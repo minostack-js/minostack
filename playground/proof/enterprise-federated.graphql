@@ -1,0 +1,158 @@
+extend schema @link(url: "https://specs.apollo.dev/federation/v2.3", import: ["@key", "@shareable", "@provides", "@requires", "@external", "@override", "@tag", "@inaccessible"])
+
+scalar JSON
+
+enum UserRole {
+  admin
+  member
+  guest
+}
+
+enum OrderStatus {
+  pending
+  paid
+  shipped
+  cancelled
+}
+
+union QuerySearch = Article | Author
+
+"""Enterprise user."""
+type User @key(fields: "id") @shareable {
+  id: String!
+  email: String!
+  name: String!
+  role: UserRole!
+  createdAt: String!
+}
+
+"""Catalog product."""
+type Product @key(fields: "id") @shareable {
+  id: String!
+  name: String!
+  price: Float!
+  sku: String
+  tags: [String!]
+}
+
+"""Single order line."""
+type OrderItem {
+  productId: String!
+  quantity: Int!
+  price: Float!
+}
+
+"""Customer order."""
+type Order @key(fields: "id") {
+  id: String!
+  userId: String!
+  items: [OrderItem!]!
+  total: Float!
+  status: OrderStatus!
+  createdAt: String!
+}
+
+"""Standard error envelope."""
+type ErrorResponse {
+  code: String!
+  message: String!
+  details: JSON
+}
+
+type Article {
+  id: String!
+  title: String!
+}
+
+type Author {
+  id: String!
+  name: String!
+}
+
+type Query {
+  """Enterprise user."""
+  me: User! @shareable
+  """Enterprise user."""
+  user: User! @shareable
+  users: [User!]!
+  """Catalog product."""
+  product: Product! @shareable
+  products: [Product!]!
+  """Customer order."""
+  order: Order!
+  search: QuerySearch!
+}
+
+type Mutation {
+  """Enterprise user."""
+  createUser: User! @shareable
+  """Customer order."""
+  createOrder: Order!
+  """Catalog product."""
+  updateProduct: Product! @shareable
+}
+
+type Subscription {
+  """Customer order."""
+  orderUpdated: Order!
+  """Catalog product."""
+  productUpdated: Product! @shareable
+}
+
+"""Enterprise user."""
+input UserInput {
+  id: String!
+  email: String!
+  name: String!
+  role: UserRole = member
+  createdAt: String!
+}
+
+"""Catalog product."""
+input ProductInput {
+  id: String!
+  name: String!
+  price: Float!
+  sku: String
+  tags: [String!]
+}
+
+"""Single order line."""
+input OrderItemInput {
+  productId: String!
+  quantity: Int!
+  price: Float!
+}
+
+"""Customer order."""
+input OrderInput {
+  id: String!
+  userId: String!
+  items: [OrderItemInput!]!
+  total: Float!
+  status: OrderStatus = pending
+  createdAt: String!
+}
+
+"""Standard error envelope."""
+input ErrorResponseInput {
+  code: String!
+  message: String!
+  details: JSON
+}
+
+input ArticleInput {
+  id: String!
+  title: String!
+}
+
+input AuthorInput {
+  id: String!
+  name: String!
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}

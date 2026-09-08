@@ -1,0 +1,54 @@
+{
+  "name": "@minostack/openapi",
+  "version": "0.0.0",
+  "description": "Convert @minostack/schema graphs to OpenAPI 3.1 and 3.0 Schema Objects and documents.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "openapi",
+    "oas",
+    "schema",
+    "minostack"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest",
+    "lint": "oxlint && eslint .",
+    "clean": "rimraf dist",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "@minostack/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@minostack/eslint-config": "workspace:*",
+    "@minostack/tsconfig": "workspace:*",
+    "@minostack/vitest-config": "workspace:*",
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "eslint": "catalog:",
+    "oxlint": "catalog:",
+    "rimraf": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

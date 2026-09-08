@@ -1,0 +1,10 @@
+{
+  "extends": "@minostack/tsconfig/library.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "types": ["node"]
+  },
+  "include": ["src"],
+  "exclude": ["dist"]
+}

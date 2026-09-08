@@ -1,0 +1,31 @@
+{
+  "name": "@minostack/vitest-config",
+  "version": "0.0.0",
+  "description": "Shared Vitest base config for minostack-js workspaces.",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    "./base": "./base.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "base.js"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "lint": "oxlint && eslint ."
+  },
+  "dependencies": {
+    "@vitest/coverage-v8": "catalog:",
+    "vitest": "catalog:"
+  },
+  "devDependencies": {
+    "@minostack/eslint-config": "workspace:*",
+    "eslint": "catalog:",
+    "oxlint": "catalog:"
+  }
+}

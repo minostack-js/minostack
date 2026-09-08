@@ -1,0 +1,35 @@
+{
+  "name": "@minostack/eslint-config",
+  "version": "0.0.0",
+  "description": "Shared ESLint flat-config base for minostack-js workspaces.",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    "./base": "./base.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "base.js"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "lint": "oxlint && eslint ."
+  },
+  "dependencies": {
+    "@eslint/js": "catalog:",
+    "eslint-config-prettier": "catalog:",
+    "eslint-plugin-oxlint": "catalog:",
+    "globals": "catalog:",
+    "typescript-eslint": "catalog:"
+  },
+  "devDependencies": {
+    "@minostack/tsconfig": "workspace:*",
+    "eslint": "catalog:",
+    "oxlint": "catalog:",
+    "typescript": "catalog:"
+  }
+}

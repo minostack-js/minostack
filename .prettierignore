@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.turbo/
+coverage/
+playground/snapshots/
+playground/proof/
+pnpm-lock.yaml
+*.log

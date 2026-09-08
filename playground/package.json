@@ -1,0 +1,38 @@
+{
+  "name": "@minostack/playground",
+  "version": "0.0.0",
+  "description": "Dev-time playground and in-depth references for @minostack/* packages. Private, never published.",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "tsx --watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "proof": "tsx src/proof.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest",
+    "lint": "oxlint && eslint ."
+  },
+  "dependencies": {
+    "@minostack/graphql": "workspace:*",
+    "@minostack/openapi": "workspace:*",
+    "@minostack/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@minostack/eslint-config": "workspace:*",
+    "@minostack/tsconfig": "workspace:*",
+    "@minostack/vitest-config": "workspace:*",
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "eslint": "catalog:",
+    "oxlint": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

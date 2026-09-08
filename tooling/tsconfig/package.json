@@ -1,0 +1,17 @@
+{
+  "name": "@minostack/tsconfig",
+  "version": "0.0.0",
+  "description": "Shared TypeScript compiler configs for minostack-js workspaces.",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./base.json": "./base.json",
+    "./library.json": "./library.json",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "base.json",
+    "library.json"
+  ]
+}

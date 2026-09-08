@@ -1,0 +1,51 @@
+"""Post status."""
+enum PostStatus {
+  draft
+  published
+}
+
+"""Post author."""
+type Author {
+  id: String!
+  name: String!
+}
+
+"""A blog post."""
+type Post {
+  id: String!
+  title: String!
+  """Post status."""
+  status: PostStatus!
+  """Post author."""
+  author: Author!
+}
+
+"""GET /posts response envelope."""
+type PostsPage {
+  items: [Post!]!
+  total: Int!
+  page: Int!
+}
+
+"""Post author."""
+input AuthorInput {
+  id: String!
+  name: String!
+}
+
+"""A blog post."""
+input PostInput {
+  id: String!
+  title: String!
+  """Post status."""
+  status: PostStatus!
+  """Post author."""
+  author: AuthorInput!
+}
+
+"""GET /posts response envelope."""
+input PostsPageInput {
+  items: [PostInput!]!
+  total: Int!
+  page: Int = 1
+}

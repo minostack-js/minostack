@@ -1,0 +1,114 @@
+scalar JSON
+
+enum UserRole {
+  admin
+  member
+  guest
+}
+
+enum OrderStatus {
+  pending
+  paid
+  shipped
+  cancelled
+}
+
+"""Enterprise user."""
+type User {
+  id: String!
+  email: String!
+  name: String!
+  role: UserRole!
+  createdAt: String!
+}
+
+"""Catalog product."""
+type Product {
+  id: String!
+  name: String!
+  price: Float!
+  sku: String
+  tags: [String!]
+}
+
+"""Single order line."""
+type OrderItem {
+  productId: String!
+  quantity: Int!
+  price: Float!
+}
+
+"""Customer order."""
+type Order {
+  id: String!
+  userId: String!
+  items: [OrderItem!]!
+  total: Float!
+  status: OrderStatus!
+  createdAt: String!
+}
+
+"""Standard error envelope."""
+type ErrorResponse {
+  code: String!
+  message: String!
+  details: JSON
+}
+
+"""Paginated users envelope."""
+type PaginatedUsers {
+  items: [User!]!
+  total: Int!
+  page: Int!
+  limit: Int!
+}
+
+"""Enterprise user."""
+input UserInput {
+  id: String!
+  email: String!
+  name: String!
+  role: UserRole = member
+  createdAt: String!
+}
+
+"""Catalog product."""
+input ProductInput {
+  id: String!
+  name: String!
+  price: Float!
+  sku: String
+  tags: [String!]
+}
+
+"""Single order line."""
+input OrderItemInput {
+  productId: String!
+  quantity: Int!
+  price: Float!
+}
+
+"""Customer order."""
+input OrderInput {
+  id: String!
+  userId: String!
+  items: [OrderItemInput!]!
+  total: Float!
+  status: OrderStatus = pending
+  createdAt: String!
+}
+
+"""Standard error envelope."""
+input ErrorResponseInput {
+  code: String!
+  message: String!
+  details: JSON
+}
+
+"""Paginated users envelope."""
+input PaginatedUsersInput {
+  items: [UserInput!]!
+  total: Int!
+  page: Int = 1
+  limit: Int = 20
+}
