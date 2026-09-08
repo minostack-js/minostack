@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MinoStack Benchmark — Mino vs Hono vs Express</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;600;700&display=swap');
+  body { font-family: Inter, sans-serif; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+</style>
+</head>
+<body class="bg-[#0a0a0f] text-zinc-100 min-h-screen">
+  <div class="max-w-[1400px] mx-auto px-6 py-8">
+    <!-- Header -->
+    <div class="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-500 p-[1.5px] shadow-2xl shadow-indigo-500/20">
+      <div class="rounded-[26px] bg-zinc-950 p-6 md:p-8">
+        <div class="flex flex-wrap items-start justify-between gap-6">
+          <div class="min-w-0 flex-1">
+            <div class="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500/20 to-fuchsia-500/20 border border-white/10 px-3 py-1.5 text-[11px] font-bold tracking-[0.14em] text-white/90">
+              <span class="h-2 w-2 animate-pulse rounded-full bg-emerald-400"></span>
+              MINOSTACK BENCHMARK • SEQUENTIAL • 2026-09-08
+            </div>
+            <h1 class="mt-4 text-[30px] md:text-[42px] font-[800] tracking-[-0.03em] leading-none">Mino <span class="bg-gradient-to-r from-indigo-400 to-fuchsia-400 bg-clip-text text-transparent">vs</span> Hono <span class="text-white/40">vs</span> Express <span class="text-white/60">v5</span></h1>
+            <p class="mt-3 max-w-2xl text-[14px] leading-relaxed text-zinc-400">Fetch micro-benchmark — <span class="text-zinc-200 font-semibold">performance.now()</span> in-process, no TCP. Reproducible per <span class="rounded bg-white/10 px-1.5 py-0.5 font-mono text-xs">§31-32</span> • Sequential: <span class="text-zinc-200">scenario → workload → framework</span> with <span class="font-mono text-xs bg-zinc-800 px-1.5 py-0.5 rounded">await</span> • 48 runs • mino / hono</p>
+            <div class="mt-4 flex flex-wrap gap-2 text-xs">
+              <span class="rounded-full bg-indigo-500/20 px-3 py-1 font-mono text-indigo-300">bun v24.3.0</span>
+              <span class="rounded-full bg-zinc-800 px-3 py-1 font-mono">12th Gen Intel(R) Core(TM) i5-1235U ×12</span>
+              <span class="rounded-full bg-zinc-800 px-3 py-1 font-mono">linux x64 7.0.0-31-generic</span>
+              <span class="rounded-full bg-zinc-800 px-3 py-1 font-mono">2026-09-08T19:32:06.908Z</span>
+            </div>
+          </div>
+          <div class="rounded-2xl bg-white p-4 text-zinc-900">
+            <div class="text-xs font-bold tracking-widest text-zinc-500">VERSIONS</div>
+            <div class="mono mt-2 space-y-1 text-sm">
+              <div>mino <span class="font-semibold">0.0.0</span></div>
+              <div>hono <span class="font-semibold">4.13.7</span></div>
+              <div>express <span class="font-semibold">5.2.1</span></div>
+              <div class="text-xs text-zinc-500">autocannon 8.0.0</div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+          <div class="rounded-2xl bg-zinc-900 p-4"><div class="text-xs text-zinc-500">Scenarios</div><div class="mt-1 text-2xl font-bold">11</div><div class="text-xs text-zinc-500">static → large-json</div></div>
+          <div class="rounded-2xl bg-zinc-900 p-4"><div class="text-xs text-zinc-500">Frameworks</div><div class="mt-1 text-2xl font-bold">2</div><div class="text-xs text-zinc-500">mino / hono</div></div>
+          <div class="rounded-2xl bg-zinc-900 p-4"><div class="text-xs text-zinc-500">Total runs</div><div class="mt-1 text-2xl font-bold">48</div><div class="text-xs text-zinc-500">bun • 15.3 GB</div></div>
+          <div class="rounded-2xl bg-zinc-900 p-4"><div class="text-xs text-zinc-500">Fastest (avg)</div><div class="mt-1 text-2xl font-bold">hono 242,334 req/s</div><div class="text-xs text-zinc-500">moderate workload</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="mt-8 grid gap-6 lg:grid-cols-2">
+      <div class="rounded-[20px] bg-zinc-900 p-6">
+        <h2 class="text-sm font-bold tracking-widest text-zinc-400">THROUGHPUT — Requests/sec (moderate)</h2>
+        <p class="mt-1 text-xs text-zinc-500">Higher is better • grouped by scenario</p>
+        <div class="mt-4 h-[340px]"><canvas id="rpsChart"></canvas></div>
+      </div>
+      <div class="rounded-[20px] bg-zinc-900 p-6">
+        <h2 class="text-sm font-bold tracking-widest text-zinc-400">LATENCY — p95 ms (moderate)</h2>
+        <p class="mt-1 text-xs text-zinc-500">Lower is better • p95</p>
+        <div class="mt-4 h-[340px]"><canvas id="latChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Detailed table -->
+    <div class="mt-8 rounded-[20px] bg-zinc-900 p-6">
+      <div class="flex items-center justify-between">
+        <h2 class="text-sm font-bold tracking-widest text-zinc-400">DETAILED RESULTS</h2>
+        <span class="mono text-xs text-zinc-500">48 rows • sequential • 2026-09-08T19:32:06.908Z</span>
+      </div>
+      <div class="mt-4 overflow-auto rounded-xl border border-zinc-800">
+        <table class="min-w-full text-left text-sm">
+          <thead class="bg-zinc-950 text-xs uppercase tracking-widest text-zinc-500">
+            <tr><th class="px-4 py-3">Scenario</th><th class="px-3 py-3">Workload</th><th class="px-3 py-3">Framework</th><th class="px-3 py-3 text-right">Req/s</th><th class="px-3 py-3 text-right">Avg ms</th><th class="px-3 py-3 text-right">p50</th><th class="px-3 py-3 text-right">p95</th><th class="px-3 py-3 text-right">p99</th><th class="px-3 py-3 text-right">Err%</th><th class="px-3 py-3 text-right">Heap MB</th></tr>
+          </thead>
+          <tbody id="tbody" class="divide-y divide-zinc-800 mono text-xs"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- System -->
+    <div class="mt-8 rounded-[20px] bg-zinc-900 p-6">
+      <h2 class="text-sm font-bold tracking-widest text-zinc-400">REPRODUCIBILITY — §31</h2>
+      <div class="mt-4 grid gap-4 text-xs leading-relaxed text-zinc-400 md:grid-cols-2">
+        <div class="space-y-2">
+          <div><span class="text-zinc-500">CPU:</span> 12th Gen Intel(R) Core(TM) i5-1235U ×12</div>
+          <div><span class="text-zinc-500">RAM:</span> 15.3 GB</div>
+          <div><span class="text-zinc-500">OS:</span> Linux 7.0.0-31-generic • linux x64 7.0.0-31-generic</div>
+          <div><span class="text-zinc-500">Runtime:</span> bun v24.3.0</div>
+          <div><span class="text-zinc-500">Date:</span> 2026-09-08T19:32:06.908Z</div>
+        </div>
+        <div class="space-y-2">
+          <div><span class="text-zinc-500">Tool:</span> performance.now() micro (fetch, no network) • autocannon for network</div>
+          <div><span class="text-zinc-500">Warmup:</span> 2k • Iterations: 1k/5k/10k • Concurrency: 1/10/50 • Pipelining: 1</div>
+          <div><span class="text-zinc-500">Protocol:</span> http/1.1 • Keep-Alive: yes • Payload: small 20B / large ~2KB / text 120B</div>
+          <div><span class="text-zinc-500">Versions:</span> @minostack/mino 0.0.0 • hono 4.13.7 • express 5.2.1 • autocannon 8.0.0</div>
+        </div>
+      </div>
+      <div class="mt-6 flex gap-3">
+        <a href="latest.json" class="rounded-full bg-white px-4 py-2 text-xs font-bold text-zinc-900">Download JSON</a>
+        <a href="latest.csv" class="rounded-full bg-zinc-800 px-4 py-2 text-xs font-bold">Download CSV</a>
+        <span class="mono flex items-center text-xs text-zinc-500">data/latest.json • data/history/</span>
+      </div>
+    </div>
+
+    <div class="py-8 text-center text-xs text-zinc-600">Generated by @minostack/benchmark • Sequential runner • Visual report • 2026-09-08T19:32:06.908Z</div>
+  </div>
+
+<script>
+const report = {"timestamp":"2026-09-08T19:32:06.908Z","system":{"runtime":"bun","node":"v24.3.0","platform":"linux x64 7.0.0-31-generic","cpu":"12th Gen Intel(R) Core(TM) i5-1235U","cores":12,"ram":"15.3 GB","os":"Linux 7.0.0-31-generic"},"versions":{"@minostack/mino":"0.0.0","hono":"4.13.7","express":"5.2.1","autocannon":"8.0.0"},"results":[{"name":"static (low)","framework":"mino","iterations":1000,"concurrency":1,"elapsedMs":11.974820999999999,"rps":83508.55515919613,"avgMs":0.011974820999999998,"p50":0.010063000000002376,"p95":0.020179999999996312,"p99":0.02872899999999845,"min":0.005859999999998422,"max":0.538759000000006,"errors":0,"rssMB":71.43359375,"heapUsedMB":0.2188405990600586,"heapTotalMB":9.185546875,"cpuUserMs":29.349,"cpuSystemMs":8.09},{"name":"static (low)","framework":"hono","iterations":1000,"concurrency":1,"elapsedMs":9.432997999999998,"rps":106010.83557952628,"avgMs":0.009432997999999998,"p50":0.008035000000006676,"p95":0.016107999999988465,"p99":0.02653399999999806,"min":0.004618999999991047,"max":0.13734100000000637,"errors":0,"rssMB":85.859375,"heapUsedMB":0.2188405990600586,"heapTotalMB":20.259765625,"cpuUserMs":7.484,"cpuSystemMs":2.891},{"name":"static (moderate)","framework":"mino","iterations":5000,"concurrency":10,"elapsedMs":34.90522399999999,"rps":143245.03403845802,"avgMs":0.006981044799999998,"p50":0.055940999999990026,"p95":0.11396400000000995,"p99":0.21824899999998593,"min":0.024221000000011372,"max":3.0580150000000117,"errors":0,"rssMB":104.984375,"heapUsedMB":2.610711097717285,"heapTotalMB":29.94921875,"cpuUserMs":65.404,"cpuSystemMs":0.956},{"name":"static (moderate)","framework":"hono","iterations":5000,"concurrency":10,"elapsedMs":18.702474000000024,"rps":267344.3096351848,"avgMs":0.0037404948000000046,"p50":0.028067999999990434,"p95":0.058707999999995764,"p99":0.10077799999999115,"min":0.010129000000006272,"max":1.3215160000000026,"errors":0,"rssMB":110.859375,"heapUsedMB":3.467391014099121,"heapTotalMB":34.794921875,"cpuUserMs":35.051,"cpuSystemMs":0},{"name":"static (high)","framework":"mino","iterations":10000,"concurrency":50,"elapsedMs":68.105853,"rps":146830.25848013387,"avgMs":0.0068105853,"p50":0.30123700000001463,"p95":0.6869470000000035,"p99":1.8529869999999846,"min":0.09962600000000066,"max":4.642066999999997,"errors":0,"rssMB":121.8203125,"heapUsedMB":4.601448059082031,"heapTotalMB":38.525390625,"cpuUserMs":107.086,"cpuSystemMs":5.086},{"name":"static (high)","framework":"hono","iterations":10000,"concurrency":50,"elapsedMs":33.04392499999997,"rps":302627.48750337644,"avgMs":0.0033043924999999973,"p50":0.11819099999996752,"p95":0.2675109999999563,"p99":0.443004999999971,"min":0.03589199999998982,"max":5.300423999999964,"errors":0,"rssMB":123.6953125,"heapUsedMB":5.493090629577637,"heapTotalMB":39.369140625,"cpuUserMs":64.24,"cpuSystemMs":0.18},{"name":"param (low)","framework":"mino","iterations":1000,"concurrency":1,"elapsedMs":5.328841000000011,"rps":187658.06673533662,"avgMs":0.005328841000000011,"p50":0.0032110000000216132,"p95":0.007632999999998447,"p99":0.01571400000000267,"min":0.002717000000018288,"max":1.0161019999999894,"errors":0,"rssMB":124.0703125,"heapUsedMB":6.355907440185547,"heapTotalMB":39.5263671875,"cpuUserMs":8.767,"cpuSystemMs":0},{"name":"param (low)","framework":"hono","iterations":1000,"concurrency":1,"elapsedMs":4.334321999999986,"rps":230716.59189141996,"avgMs":0.004334321999999986,"p50":0.002950999999995929,"p95":0.009969000000012329,"p99":0.01933099999996557,"min":0.0024999999999977263,"max":0.16759000000001834,"errors":0,"rssMB":124.16796875,"heapUsedMB":6.355907440185547,"heapTotalMB":39.5419921875,"cpuUserMs":4.442,"cpuSystemMs":0.041},{"name":"param (moderate)","framework":"mino","iterations":5000,"concurrency":10,"elapsedMs":20.22081800000001,"rps":247269.91756713294,"avgMs":0.004044163600000002,"p50":0.03196600000001126,"p95":0.07224100000001954,"p99":0.1251280000000179,"min":0.014618999999981952,"max":1.1188549999999964,"errors":0,"rssMB":127.04296875,"heapUsedMB":7.2168684005737305,"heapTotalMB":39.9794921875,"cpuUserMs":32.76,"cpuSystemMs":1.152},{"name":"param (moderate)","framework":"hono","iterations":5000,"concurrency":10,"elapsedMs":20.28180900000001,"rps":246526.33303074678,"avgMs":0.004056361800000002,"p50":0.032559999999989486,"p95":0.07477399999999079,"p99":0.10678400000000465,"min":0.012282000000027438,"max":1.0042100000000005,"errors":0,"rssMB":127.41796875,"heapUsedMB":7.932926177978516,"heapTotalMB":40.1982421875,"cpuUserMs":35.943,"cpuSystemMs":1.744},{"name":"param (high)","framework":"mino","iterations":10000,"concurrency":50,"elapsedMs":38.55489299999999,"rps":259370.45137176238,"avgMs":0.0038554892999999994,"p50":0.15959299999997256,"p95":0.3213440000000105,"p99":0.5338310000000206,"min":0.057165999999995165,"max":2.2661339999999655,"errors":0,"rssMB":129.64453125,"heapUsedMB":9.060016632080078,"heapTotalMB":40.55859375,"cpuUserMs":60.971,"cpuSystemMs":0.93},{"name":"param (high)","framework":"hono","iterations":10000,"concurrency":50,"elapsedMs":37.81953900000002,"rps":264413.5879075627,"avgMs":0.003781953900000002,"p50":0.15987400000000207,"p95":0.30024499999996124,"p99":0.580964999999992,"min":0.03851199999996879,"max":2.0531290000000126,"errors":0,"rssMB":130.76953125,"heapUsedMB":10.72348690032959,"heapTotalMB":41.43359375,"cpuUserMs":52.434,"cpuSystemMs":1.015},{"name":"multi-param (low)","framework":"mino","iterations":1000,"concurrency":1,"elapsedMs":3.699672000000021,"rps":270294.23148862773,"avgMs":0.003699672000000021,"p50":0.0031520000000000437,"p95":0.005227999999988242,"p99":0.015544999999974607,"min":0.0026469999999676475,"max":0.04861599999998134,"errors":0,"rssMB":132.39453125,"heapUsedMB":10.72348690032959,"heapTotalMB":41.4345703125,"cpuUserMs":11.723,"cpuSystemMs":0},{"name":"multi-param (low)","framework":"hono","iterations":1000,"concurrency":1,"elapsedMs":3.640555000000006,"rps":274683.39305408054,"avgMs":0.0036405550000000063,"p50":0.00269700000001194,"p95":0.008029000000021824,"p99":0.019114999999999327,"min":0.0022679999999581923,"max":0.0654060000000527,"errors":0,"rssMB":133.14453125,"heapUsedMB":10.72348690032959,"heapTotalMB":41.4345703125,"cpuUserMs":6.373,"cpuSystemMs":0},{"name":"multi-param (moderate)","framework":"mino","iterations":5000,"concurrency":10,"elapsedMs":19.491929999999968,"rps":256516.41474189615,"avgMs":0.0038983859999999937,"p50":0.03153200000002698,"p95":0.06065799999998944,"p99":0.09570999999999685,"min":0.0135450000000219,"max":1.562564000000009,"errors":0,"rssMB":132.703125,"heapUsedMB":11.362648963928223,"heapTotalMB":41.4345703125,"cpuUserMs":25.219,"cpuSystemMs":2.664},{"name":"multi-param (moderate)","framework":"hono","iterations":5000,"concurrency":10,"elapsedMs":20.35865799999999,"rps":245595.75586956675,"avgMs":0.004071731599999998,"p50":0.03202099999998609,"p95":0.06810400000006211,"p99":0.11376599999994141,"min":0.02091399999994792,"max":1.3743839999999636,"errors":0,"rssMB":132.953125,"heapUsedMB":12.231134414672852,"heapTotalMB":41.4345703125,"cpuUserMs":36.11,"cpuSystemMs":0.887},{"name":"wildcard (low)","framework":"mino","iterations":1000,"concurrency":1,"elapsedMs":4.010342000000037,"rps":249355.29189280886,"avgMs":0.0040103420000000365,"p50":0.0031799999999293505,"p95":0.005838000000039756,"p99":0.01959799999997358,"min":0.0026439999999183783,"max":0.07042500000000018,"errors":0,"rssMB":135.078125,"heapUsedMB":12.231134414672852,"heapTotalMB":41.435546875,"cpuUserMs":5.009,"cpuSystemMs":2.976},{"name":"wildcard (low)","framework":"hono","iterations":1000,"concurrency":1,"elapsedMs":5.871533999999997,"rps":170313.24352375383,"avgMs":0.005871533999999997,"p50":0.0030140000000073996,"p95":0.007553000000029897,"p99":0.016508000000044376,"min":0.002070000000003347,"max":1.4838340000000017,"errors":0,"rssMB":136.203125,"heapUsedMB":12.936694145202637,"heapTotalMB":41.529296875,"cpuUserMs":17.126,"cpuSystemMs":0.848},{"name":"wildcard (moderate)","framework":"mino","iterations":5000,"concurrency":10,"elapsedMs":23.611541999999986,"rps":211760.84137156323,"avgMs":0.004722308399999997,"p50":0.03681300000005194,"p95":0.09458299999994324,"p99":0.18464699999992717,"min":0.012240999999903579,"max":0.29246100000000297,"errors":0,"rssMB":137.203125,"heapUsedMB":12.936694145202637,"heapTotalMB":41.544921875,"cpuUserMs":40.073,"cpuSystemMs":1.088},{"name":"wildcard (moderate)","framework":"hono","iterations":5000,"concurrency":10,"elapsedMs":20.908667000000037,"rps":239135.28299054125,"avgMs":0.004181733400000007,"p50":0.030815999999958876,"p95":0.09070899999994708,"p99":0.14857400000005327,"min":0.01284900000007383,"max":1.3213980000000447,"errors":0,"rssMB":134.578125,"heapUsedMB":13.635212898254395,"heapTotalMB":41.888671875,"cpuUserMs":26.689,"cpuSystemMs":2.99},{"name":"deep-nested (low)","framework":"mino","iterations":1000,"concurrency":1,"elapsedMs":3.4655199999999695,"rps":288556.9842332489,"avgMs":0.0034655199999999694,"p50":0.0029580000000350992,"p95":0.004464999999981956,"p99":0.013277000000016415,"min":0.0026629999999840948,"max":0.029272999999989224,"errors":0,"rssMB":134.953125,"heapUsedMB":13.635212898254395,"heapTotalMB":41.888671875,"cpuUserMs":3.483,"cpuSystemMs":0},{"name":"deep-nested (low)","framework":"hono","iterations":1000,"concurrency":1,"elapsedMs":3.983908999999926,"rps":251009.7494696838,"avgMs":0.003983908999999926,"p50":0.002866000000040003,"p95":0.009092000000009648,"p99":0.019255000000043765,"min":0.002259000000094602,"max":0.06749999999999545,"errors":0,"rssMB":134.953125,"heapUsedMB":14.305375099182129,"heapTotalMB":41.888671875,"cpuUserMs":4.142,"cpuSystemMs":0.014},{"name":"deep-nested (moderate)","framework":"mino","iterations":5000,"concurrency":10,"elapsedMs":19.472357999999986,"rps":256774.2437767426,"avgMs":0.003894471599999997,"p50":0.03192799999999352,"p95":0.05851600000005419,"p99":0.1328649999999243,"min":0.01396999999997206,"max":1.2963449999999739,"errors":0,"rssMB":135.328125,"heapUsedMB":15.05884075164795,"heapTotalMB":41.888671875,"cpuUserMs":26.704,"cpuSystemMs":0.14},{"name":"deep-nested (moderate)","framework":"hono","iterations":5000,"concurrency":10,"elapsedMs":18.178285999999957,"rps":275053.4346307464,"avgMs":0.0036356571999999914,"p50":0.028772000000003572,"p95":0.05564600000002429,"p99":0.13646000000005643,"min":0.02192400000001271,"max":0.9672970000000305,"errors":0,"rssMB":135.328125,"heapUsedMB":15.710135459899902,"heapTotalMB":42.044921875,"cpuUserMs":18.178,"cpuSystemMs":1.738},{"name":"middleware-1 (low)","framework":"mino","iterations":1000,"concurrency":1,"elapsedMs":4.650780999999938,"rps":215017.64972378043,"avgMs":0.004650780999999938,"p50":0.003655000000094333,"p95":0.007400999999958913,"p99":0.020883000000026186,"min":0.0027959999999893625,"max":0.09000500000001921,"errors":0,"rssMB":135.328125,"heapUsedMB":15.710135459899902,"heapTotalMB":42.060546875,"cpuUserMs":4.704,"cpuSystemMs":0},{"name":"middleware-1 (low)","framework":"hono","iterations":1000,"concurrency":1,"elapsedMs":3.231759000000011,"rps":309429.01373524347,"avgMs":0.003231759000000011,"p50":0.0026659999999765205,"p95":0.0054810000000315995,"p99":0.013436999999953514,"min":0.0023259999999254433,"max":0.02088000000003376,"errors":0,"rssMB":134.77734375,"heapUsedMB":15.710135459899902,"heapTotalMB":42.232421875,"cpuUserMs":4.131,"cpuSystemMs":0.077},{"name":"middleware-1 (moderate)","framework":"mino","iterations":5000,"concurrency":10,"elapsedMs":22.71519599999999,"rps":220116.96487232606,"avgMs":0.004543039199999998,"p50":0.0359489999999596,"p95":0.09005500000000666,"p99":0.17092200000001867,"min":0.015264999999999418,"max":0.3022490000000744,"errors":0,"rssMB":136.52734375,"heapUsedMB":16.150731086730957,"heapTotalMB":42.857421875,"cpuUserMs":57.351,"cpuSystemMs":0.116},{"name":"middleware-1 (moderate)","framework":"hono","iterations":5000,"concurrency":10,"elapsedMs":19.91349500000001,"rps":251086.00976373043,"avgMs":0.003982699000000003,"p50":0.031134999999949287,"p95":0.06279600000004848,"p99":0.12841200000002573,"min":0.020662000000015723,"max":1.4972320000000536,"errors":0,"rssMB":137.15234375,"heapUsedMB":16.81305503845215,"heapTotalMB":43.560546875,"cpuUserMs":38.305,"cpuSystemMs":0.949},{"name":"middleware-5 (low)","framework":"mino","iterations":1000,"concurrency":1,"elapsedMs":6.020284000000061,"rps":166105.12062221483,"avgMs":0.006020284000000061,"p50":0.005507000000079643,"p95":0.007918000000017855,"p99":0.017698999999993248,"min":0.0045509999999922,"max":0.037850999999932355,"errors":0,"rssMB":138.02734375,"heapUsedMB":17.419745445251465,"heapTotalMB":44.107421875,"cpuUserMs":17.237,"cpuSystemMs":0.086},{"name":"middleware-5 (low)","framework":"hono","iterations":1000,"concurrency":1,"elapsedMs":9.407774000000018,"rps":106295.07043855413,"avgMs":0.009407774000000018,"p50":0.00548300000002655,"p95":0.013784999999984393,"p99":0.03057899999998881,"min":0.0040260000000671425,"max":2.3783899999999676,"errors":0,"rssMB":140.62109375,"heapUsedMB":17.621804237365723,"heapTotalMB":46.998046875,"cpuUserMs":21.863,"cpuSystemMs":0.127},{"name":"middleware-5 (moderate)","framework":"mino","iterations":5000,"concurrency":10,"elapsedMs":29.30919700000004,"rps":170594.91599172755,"avgMs":0.005861839400000008,"p50":0.0519649999999956,"p95":0.08593500000006316,"p99":0.13217499999996107,"min":0.030867000000057487,"max":0.8260099999999966,"errors":0,"rssMB":142.74609375,"heapUsedMB":17.98756694793701,"heapTotalMB":49.404296875,"cpuUserMs":28.526,"cpuSystemMs":2.03},{"name":"middleware-5 (moderate)","framework":"hono","iterations":5000,"concurrency":10,"elapsedMs":28.791860000000042,"rps":173660.1942354538,"avgMs":0.005758372000000008,"p50":0.04721899999992729,"p95":0.09038599999996677,"p99":0.1365970000000516,"min":0.027590999999915766,"max":1.971318999999994,"errors":0,"rssMB":143.12109375,"heapUsedMB":18.804105758666992,"heapTotalMB":49.748046875,"cpuUserMs":36.773,"cpuSystemMs":0.005},{"name":"middleware-10 (low)","framework":"mino","iterations":1000,"concurrency":1,"elapsedMs":9.740981000000033,"rps":102659.06483135493,"avgMs":0.009740981000000034,"p50":0.008288999999990665,"p95":0.012826000000018212,"p99":0.02086100000008173,"min":0.006720000000086657,"max":0.6647080000000187,"errors":0,"rssMB":140.6328125,"heapUsedMB":19.000925064086914,"heapTotalMB":49.998046875,"cpuUserMs":12.812,"cpuSystemMs":0.053},{"name":"middleware-10 (low)","framework":"hono","iterations":1000,"concurrency":1,"elapsedMs":13.250115999999935,"rps":75471.03738563534,"avgMs":0.013250115999999935,"p50":0.008733000000006541,"p95":0.022530000000074324,"p99":0.04863000000000284,"min":0.005842000000029657,"max":1.730611999999951,"errors":0,"rssMB":140.8828125,"heapUsedMB":19.16449737548828,"heapTotalMB":50.029296875,"cpuUserMs":19.882,"cpuSystemMs":0.987},{"name":"middleware-10 (moderate)","framework":"mino","iterations":5000,"concurrency":10,"elapsedMs":51.255675,"rps":97550.17371247185,"avgMs":0.010251135,"p50":0.08668199999999615,"p95":0.1793240000000651,"p99":0.2992260000000897,"min":0.043932000000040716,"max":1.0077189999999518,"errors":0,"rssMB":141.40625,"heapUsedMB":19.741040229797363,"heapTotalMB":52.310546875,"cpuUserMs":52.861,"cpuSystemMs":1.717},{"name":"middleware-10 (moderate)","framework":"hono","iterations":5000,"concurrency":10,"elapsedMs":40.064837000000125,"rps":124797.71226824122,"avgMs":0.008012967400000025,"p50":0.06975600000009763,"p95":0.12611299999980474,"p99":0.18745899999998983,"min":0.05187399999999798,"max":0.8126740000000154,"errors":0,"rssMB":141.65625,"heapUsedMB":20.302818298339844,"heapTotalMB":52.513671875,"cpuUserMs":41.262,"cpuSystemMs":0.092},{"name":"small-json (low)","framework":"mino","iterations":1000,"concurrency":1,"elapsedMs":3.013116000000082,"rps":331882.34372655174,"avgMs":0.0030131160000000817,"p50":0.002617999999984022,"p95":0.003918999999996231,"p99":0.010456999999860273,"min":0.0023730000000341533,"max":0.031093999999939115,"errors":0,"rssMB":141.78125,"heapUsedMB":20.627288818359375,"heapTotalMB":52.5146484375,"cpuUserMs":3.029,"cpuSystemMs":0.004},{"name":"small-json (low)","framework":"hono","iterations":1000,"concurrency":1,"elapsedMs":3.5486969999999474,"rps":281793.5709923994,"avgMs":0.0035486969999999475,"p50":0.002721999999948821,"p95":0.007451000000173735,"p99":0.017991999999821928,"min":0.0022189999999682186,"max":0.03580999999985579,"errors":0,"rssMB":141.90625,"heapUsedMB":20.627288818359375,"heapTotalMB":52.5146484375,"cpuUserMs":3.564,"cpuSystemMs":0.031},{"name":"small-json (moderate)","framework":"mino","iterations":5000,"concurrency":10,"elapsedMs":18.864667999999938,"rps":265045.7458355491,"avgMs":0.0037729335999999876,"p50":0.0293330000001788,"p95":0.06518800000003466,"p99":0.11328499999990527,"min":0.012893999999960215,"max":1.0527759999999944,"errors":0,"rssMB":141.37109375,"heapUsedMB":21.446446418762207,"heapTotalMB":52.5615234375,"cpuUserMs":19.314,"cpuSystemMs":2.031},{"name":"small-json (moderate)","framework":"hono","iterations":5000,"concurrency":10,"elapsedMs":15.318313999999873,"rps":326406.67895958014,"avgMs":0.0030636627999999747,"p50":0.02631699999983539,"p95":0.04540099999985614,"p99":0.06169799999997849,"min":0.010131000000001222,"max":0.9260679999999866,"errors":0,"rssMB":141.49609375,"heapUsedMB":22.249932289123535,"heapTotalMB":52.5615234375,"cpuUserMs":16.51,"cpuSystemMs":0.016},{"name":"text (low)","framework":"mino","iterations":1000,"concurrency":1,"elapsedMs":4.683640000000196,"rps":213509.15100220303,"avgMs":0.004683640000000196,"p50":0.002952999999934036,"p95":0.009996000000001004,"p99":0.028533000000152242,"min":0.0021839999999428983,"max":0.0911079999998492,"errors":0,"rssMB":141.99609375,"heapUsedMB":22.249932289123535,"heapTotalMB":52.5615234375,"cpuUserMs":3.749,"cpuSystemMs":0.981},{"name":"text (low)","framework":"hono","iterations":1000,"concurrency":1,"elapsedMs":3.0260980000000473,"rps":330458.564131097,"avgMs":0.0030260980000000473,"p50":0.002120999999988271,"p95":0.007425000000012005,"p99":0.01499799999987772,"min":0.001699000000144224,"max":0.03971900000010464,"errors":0,"rssMB":142.74609375,"heapUsedMB":22.249932289123535,"heapTotalMB":52.5615234375,"cpuUserMs":5.106,"cpuSystemMs":0.008},{"name":"text (moderate)","framework":"mino","iterations":5000,"concurrency":10,"elapsedMs":22.042781000000105,"rps":226831.6325421904,"avgMs":0.004408556200000021,"p50":0.031377000000020416,"p95":0.08538000000021384,"p99":0.1533480000000509,"min":0.014939000000140368,"max":1.9320729999999458,"errors":0,"rssMB":144.37109375,"heapUsedMB":23.167941093444824,"heapTotalMB":53.2802734375,"cpuUserMs":24.416,"cpuSystemMs":0.031},{"name":"text (moderate)","framework":"hono","iterations":5000,"concurrency":10,"elapsedMs":13.880841999999802,"rps":360208.6962736174,"avgMs":0.0027761683999999605,"p50":0.022954999999910797,"p95":0.04373099999997976,"p99":0.05940699999996468,"min":0.01100799999994706,"max":1.0581270000000131,"errors":0,"rssMB":143.19140625,"heapUsedMB":24.59861660003662,"heapTotalMB":53.2802734375,"cpuUserMs":13.659,"cpuSystemMs":1.965},{"name":"large-json (low)","framework":"mino","iterations":1000,"concurrency":1,"elapsedMs":8.043051999999989,"rps":124330.91319066462,"avgMs":0.008043051999999988,"p50":0.005953000000090469,"p95":0.011815000000069631,"p99":0.027441000000180793,"min":0.003509000000121887,"max":1.0219740000000002,"errors":0,"rssMB":152.90234375,"heapUsedMB":26.911836624145508,"heapTotalMB":53.28125,"cpuUserMs":8.11,"cpuSystemMs":1.11},{"name":"large-json (low)","framework":"hono","iterations":1000,"concurrency":1,"elapsedMs":6.2827870000000985,"rps":159165.03297023824,"avgMs":0.006282787000000099,"p50":0.0043839999998454005,"p95":0.01001500000006672,"p99":0.028077000000166663,"min":0.003382999999985259,"max":0.644568000000163,"errors":0,"rssMB":160.40234375,"heapUsedMB":30.244128227233887,"heapTotalMB":53.28125,"cpuUserMs":5.188,"cpuSystemMs":2.058},{"name":"large-json (moderate)","framework":"mino","iterations":5000,"concurrency":10,"elapsedMs":34.592877000000044,"rps":144538.426219941,"avgMs":0.0069185754000000085,"p50":0.05149699999992663,"p95":0.0962409999999636,"p99":0.22459200000002966,"min":0.01834999999982756,"max":4.898787999999968,"errors":0,"rssMB":173.27734375,"heapUsedMB":42.823771476745605,"heapTotalMB":53.296875,"cpuUserMs":27.38,"cpuSystemMs":6.064},{"name":"large-json (moderate)","framework":"hono","iterations":5000,"concurrency":10,"elapsedMs":32.07911799999988,"rps":155864.63443290486,"avgMs":0.006415823599999976,"p50":0.04747499999984939,"p95":0.10402700000008736,"p99":0.21156699999983175,"min":0.013363000000026659,"max":1.7863489999999729,"errors":0,"rssMB":170.52734375,"heapUsedMB":53.533202171325684,"heapTotalMB":53.296875,"cpuUserMs":32.282,"cpuSystemMs":2.008}],"config":{"scenarios":["static","param","multi-param","wildcard","deep-nested","middleware-1","middleware-5","middleware-10","small-json","text","large-json"],"workloads":[{"name":"low","iterations":1000,"concurrency":1},{"name":"moderate","iterations":5000,"concurrency":10},{"name":"high","iterations":10000,"concurrency":50}],"iterations":"1k/5k/10k","warmup":2000,"pipelining":1,"protocol":"http/1.1","keepAlive":true}};
+const labels = ["static","param","multi-param","wildcard","deep-nested","middleware-1","middleware-5","middleware-10","small-json","text","large-json"];
+const datasets = [{"label":"mino","data":[143245,247270,256516,211761,256774,220117,170595,97550,265046,226832,144538],"backgroundColor":"#6366f1","borderColor":"#6366f1","borderWidth":1},{"label":"hono","data":[267344,246526,245596,239135,275053,251086,173660,124798,326407,360209,155865],"backgroundColor":"#f59e0b","borderColor":"#f59e0b","borderWidth":1}];
+const latencyDatasets = [{"label":"mino","data":[0.114,0.072,0.061,0.095,0.059,0.09,0.086,0.179,0.065,0.085,0.096],"backgroundColor":"#6366f1","borderColor":"#6366f1","borderWidth":1},{"label":"hono","data":[0.059,0.075,0.068,0.091,0.056,0.063,0.09,0.126,0.045,0.044,0.104],"backgroundColor":"#f59e0b","borderColor":"#f59e0b","borderWidth":1}];
+
+new Chart(document.getElementById('rpsChart'), {
+  type: 'bar',
+  data: { labels, datasets },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { labels: { color: '#a1a1aa' } } },
+    scales: {
+      x: { ticks: { color: '#71717a' }, grid: { color: '#27272a' } },
+      y: { ticks: { color: '#71717a' }, grid: { color: '#27272a' }, beginAtZero: true }
+    }
+  }
+});
+new Chart(document.getElementById('latChart'), {
+  type: 'bar',
+  data: { labels, datasets: latencyDatasets },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { labels: { color: '#a1a1aa' } } },
+    scales: {
+      x: { ticks: { color: '#71717a' }, grid: { color: '#27272a' } },
+      y: { ticks: { color: '#71717a' }, grid: { color: '#27272a' }, beginAtZero: true }
+    }
+  }
+});
+
+// Table
+const tbody = document.getElementById('tbody');
+const rows = report.results.map(r => {
+  const errPct = ((r.errors / r.iterations) * 100).toFixed(2);
+  const frameworkColor = r.framework === 'mino' ? 'text-indigo-400' : r.framework === 'hono' ? 'text-amber-400' : 'text-emerald-400';
+  return `<tr class="hover:bg-zinc-800/50">
+    <td class="px-4 py-2 font-semibold">${r.name}</td>
+    <td class="px-3 py-2">${r.name.includes("low") ? "low" : r.name.includes("moderate") ? "moderate" : r.name.includes("high") ? "high" : ""}</td>
+    <td class="px-3 py-2 ${frameworkColor} font-bold">${r.framework}</td>
+    <td class="px-3 py-2 text-right font-bold">${Math.round(r.rps).toLocaleString()}</td>
+    <td class="px-3 py-2 text-right">${r.avgMs.toFixed(3)}</td>
+    <td class="px-3 py-2 text-right">${r.p50.toFixed(3)}</td>
+    <td class="px-3 py-2 text-right">${r.p95.toFixed(3)}</td>
+    <td class="px-3 py-2 text-right">${r.p99.toFixed(3)}</td>
+    <td class="px-3 py-2 text-right ${Number(errPct)>0?'text-red-400':''}">${errPct}%</td>
+    <td class="px-3 py-2 text-right">${r.heapUsedMB.toFixed(1)}</td>
+  </tr>`;
+}).join("");
+tbody.innerHTML = rows;
+</script>
+</body>
+</html>

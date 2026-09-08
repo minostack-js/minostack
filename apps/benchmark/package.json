@@ -1,0 +1,51 @@
+{
+  "name": "@minostack/benchmark",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "bench": "tsx src/index.ts",
+    "bench:all": "tsx src/index.ts",
+    "bench:quick": "tsx src/index.ts -- --framework=mino --scenario=static",
+    "bench:mino": "tsx src/index.ts -- --framework=mino",
+    "bench:hono": "tsx src/index.ts -- --framework=hono",
+    "bench:express": "tsx src/index.ts -- --framework=express",
+    "bench:network": "tsx src/network.ts",
+    "bench:network:quick": "tsx src/network.ts -- --connections=10 --duration=5",
+    "bench:sequential": "tsx src/sequential.ts",
+    "bench:sequential:quick": "tsx src/sequential.ts -- --quick",
+    "bench:report": "tsx src/sequential.ts",
+    "bench:visual": "echo \"Open apps/benchmark/data/report.html in browser — visual dashboard (Chart.js + Tailwind)\" && ls -lh data/report.html data/latest.json data/latest.csv 2>&1 | head -20",
+    "bench:bun": "bun run src/index.ts",
+    "bench:bun:quick": "bun run src/index.ts -- --framework=mino --scenario=static",
+    "bench:bun:all": "bun run src/index.ts -- --framework=all",
+    "bench:bun:hono": "bun run src/index.ts -- --framework=hono",
+    "bench:bun:mino": "bun run src/index.ts -- --framework=mino",
+    "bench:bun:sequential": "bun run src/sequential.ts",
+    "bench:bun:sequential:quick": "bun run src/sequential.ts -- --quick",
+    "bench:combine": "tsx src/combine.ts",
+    "bench:all-runtimes": "pnpm run bench:sequential && pnpm run bench:bun:sequential && pnpm run bench:combine",
+    "bench:all-runtimes:quick": "pnpm run bench:sequential:quick && pnpm run bench:bun:sequential:quick && pnpm run bench:combine",
+    "dev": "tsx --watch src/index.ts",
+    "build": "echo \"benchmark: no build\"",
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"benchmark: no test\"",
+    "lint": "echo \"benchmark: no lint\"",
+    "clean": "echo \"benchmark: clean\""
+  },
+  "dependencies": {
+    "@minostack/kernel": "workspace:*",
+    "@minostack/mino": "workspace:*",
+    "@minostack/runtime-node": "workspace:*",
+    "@minostack/schema": "workspace:*",
+    "@types/express": "^5.0.6",
+    "autocannon": "^8.0.0",
+    "express": "^5.2.1",
+    "hono": "^4.13.7"
+  },
+  "devDependencies": {
+    "@minostack/tsconfig": "workspace:*",
+    "@types/node": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  }
+}

@@ -337,11 +337,32 @@ function convertComponents(
     }
     out["requestBodies"] = map;
   }
-  if (components.headers !== undefined) out["headers"] = components.headers;
-  if (components.securitySchemes !== undefined) out["securitySchemes"] = components.securitySchemes;
-  if (components.examples !== undefined) out["examples"] = components.examples;
-  if (components.links !== undefined) out["links"] = components.links;
-  if (components.callbacks !== undefined) out["callbacks"] = components.callbacks;
+  if (components.headers !== undefined) {
+    const map: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(components.headers)) setProp(map, k, v as unknown);
+    out["headers"] = map;
+  }
+  if (components.securitySchemes !== undefined) {
+    const map: Record<string, SecuritySchemeObject> = {};
+    for (const [k, v] of Object.entries(components.securitySchemes))
+      setProp(map, k, v as SecuritySchemeObject);
+    out["securitySchemes"] = map;
+  }
+  if (components.examples !== undefined) {
+    const map: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(components.examples)) setProp(map, k, v);
+    out["examples"] = map;
+  }
+  if (components.links !== undefined) {
+    const map: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(components.links)) setProp(map, k, v);
+    out["links"] = map;
+  }
+  if (components.callbacks !== undefined) {
+    const map: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(components.callbacks)) setProp(map, k, v);
+    out["callbacks"] = map;
+  }
   if (components.pathItems !== undefined) {
     const map: Record<string, PathItemObject> = {};
     for (const [k, v] of Object.entries(components.pathItems)) {

@@ -39,8 +39,10 @@
   "dependencies": {
     "@minostack/schema": "workspace:*"
   },
+  "_comment": "devDependencies: @minostack/mino is dev-only for mino.test.ts — openapi runtime dep is only @minostack/schema, no mino lock-in",
   "devDependencies": {
     "@minostack/eslint-config": "workspace:*",
+    "@minostack/mino": "workspace:*",
     "@minostack/tsconfig": "workspace:*",
     "@minostack/vitest-config": "workspace:*",
     "@types/node": "catalog:",

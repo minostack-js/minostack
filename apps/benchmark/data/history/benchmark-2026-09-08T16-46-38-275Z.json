@@ -1,0 +1,117 @@
+{
+  "timestamp": "2026-09-08T16:46:38.274Z",
+  "system": {
+    "runtime": "bun",
+    "node": "v24.3.0",
+    "platform": "linux x64 7.0.0-31-generic",
+    "cpu": "12th Gen Intel(R) Core(TM) i5-1235U",
+    "cores": 12,
+    "ram": "15.3 GB",
+    "os": "Linux 7.0.0-31-generic"
+  },
+  "versions": {
+    "@minostack/mino": "0.0.0",
+    "hono": "4.13.7",
+    "express": "5.2.1",
+    "autocannon": "8.0.0"
+  },
+  "results": [
+    {
+      "name": "static (low)",
+      "framework": "mino",
+      "iterations": 1000,
+      "concurrency": 1,
+      "elapsedMs": 7.724333999999999,
+      "rps": 129460.999485522,
+      "avgMs": 0.0077243339999999985,
+      "p50": 0.0054980000000028895,
+      "p95": 0.011487999999999943,
+      "p99": 0.018951000000001272,
+      "min": 0.0030909999999977344,
+      "max": 0.561048999999997,
+      "errors": 0,
+      "rssMB": 67.73046875,
+      "heapUsedMB": 0.2188405990600586,
+      "heapTotalMB": 9.70703125,
+      "cpuUserMs": 21.416,
+      "cpuSystemMs": 2.712
+    },
+    {
+      "name": "static (moderate)",
+      "framework": "mino",
+      "iterations": 5000,
+      "concurrency": 10,
+      "elapsedMs": 28.83942300000001,
+      "rps": 173373.78767945524,
+      "avgMs": 0.005767884600000002,
+      "p50": 0.0451359999999994,
+      "p95": 0.08145100000000127,
+      "p99": 0.1736360000000019,
+      "min": 0.02905300000000466,
+      "max": 0.9224770000000007,
+      "errors": 0,
+      "rssMB": 103.23046875,
+      "heapUsedMB": 0.2188405990600586,
+      "heapTotalMB": 29.0869140625,
+      "cpuUserMs": 67.581,
+      "cpuSystemMs": 7.846
+    },
+    {
+      "name": "static (high)",
+      "framework": "mino",
+      "iterations": 10000,
+      "concurrency": 50,
+      "elapsedMs": 43.213100999999995,
+      "rps": 231411.3027898646,
+      "avgMs": 0.0043213101,
+      "p50": 0.1733599999999882,
+      "p95": 0.4162849999999878,
+      "p99": 0.7688709999999901,
+      "min": 0.1323549999999898,
+      "max": 1.8550400000000025,
+      "errors": 0,
+      "rssMB": 117.21484375,
+      "heapUsedMB": 3.4852800369262695,
+      "heapTotalMB": 31.2236328125,
+      "cpuUserMs": 106.844,
+      "cpuSystemMs": 8.035
+    }
+  ],
+  "config": {
+    "scenarios": [
+      "static",
+      "param",
+      "multi-param",
+      "wildcard",
+      "deep-nested",
+      "middleware-1",
+      "middleware-5",
+      "middleware-10",
+      "small-json",
+      "text",
+      "large-json"
+    ],
+    "workloads": [
+      {
+        "name": "low",
+        "iterations": 1000,
+        "concurrency": 1
+      },
+      {
+        "name": "moderate",
+        "iterations": 5000,
+        "concurrency": 10
+      },
+      {
+        "name": "high",
+        "iterations": 10000,
+        "concurrency": 50
+      }
+    ],
+    "iterations": "1k/5k/10k",
+    "warmup": 2000,
+    "pipelining": 1,
+    "protocol": "http/1.1",
+    "keepAlive": true
+  }
+}

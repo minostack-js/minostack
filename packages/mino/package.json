@@ -1,0 +1,75 @@
+{
+  "name": "@minostack/mino",
+  "version": "0.0.0",
+  "description": "Lightweight, Fetch-native, runtime-agnostic HTTP framework for Minostack.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./helmet": {
+      "types": "./dist/helmet.d.ts",
+      "import": "./dist/helmet.js"
+    },
+    "./cors": {
+      "types": "./dist/cors.d.ts",
+      "import": "./dist/cors.js"
+    },
+    "./rate-limit": {
+      "types": "./dist/rate-limit.d.ts",
+      "import": "./dist/rate-limit.js"
+    },
+    "./timeout": {
+      "types": "./dist/timeout.d.ts",
+      "import": "./dist/timeout.js"
+    },
+    "./request-id": {
+      "types": "./dist/request-id.d.ts",
+      "import": "./dist/request-id.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "http",
+    "framework",
+    "fetch",
+    "router",
+    "minostack",
+    "mino"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest",
+    "lint": "oxlint && eslint .",
+    "clean": "rimraf dist",
+    "prepublishOnly": "pnpm run build"
+  },
+  "_comment": "devDependencies: @minostack/schema is dev-only for tests — validator supports any Standard Schema (Zod, Valibot, ArkType) with zero runtime dep",
+  "devDependencies": {
+    "@minostack/eslint-config": "workspace:*",
+    "@minostack/schema": "workspace:*",
+    "@minostack/tsconfig": "workspace:*",
+    "@minostack/vitest-config": "workspace:*",
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "eslint": "catalog:",
+    "oxlint": "catalog:",
+    "rimraf": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

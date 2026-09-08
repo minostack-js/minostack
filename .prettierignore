@@ -6,3 +6,4 @@ playground/snapshots/
 playground/proof/
 pnpm-lock.yaml
 *.log
+apps/benchmark/data/

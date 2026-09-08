@@ -2,7 +2,7 @@
 
 > MinoStack ecosystem monorepo — TypeScript, ESM-native, pnpm + Turborepo.
 
-**Status:** `scaffold` — monorepo foundation + `@minostack/schema` API stub (0.0.0). See [Roadmap](#roadmap).
+**Status:** `phi` — `@minostack/schema` + `@minostack/mino` + `@minostack/kernel` + runtime adapters + `@minostack/openapi`/`@minostack/graphql` integration. See [Roadmap](#roadmap) and `prompt.md`.
 
 ## What is this?
 
@@ -15,20 +15,24 @@ How are tasks executed?    pnpm + Turborepo
 How are packages released? Changesets + npm (independent versions)
 ```
 
-First package on the roadmap: `@minostack/schema` — a TypeScript-first, runtime-agnostic schema + validation library with static inference and immutable composition.
+First package: `@minostack/schema` — TypeScript-first, runtime-agnostic schema + validation with `m.infer`, `parse`/`safeParse`, metadata/facets.
 
 ```ts
-// preview (not yet published)
 import { m } from "@minostack/schema";
-
 const User = m.object({ name: m.string(), age: m.number().int().optional() });
-
 type User = m.infer<typeof User>;
-
 User.safeParse(input);
 ```
 
-Details: [`blueprint.md`](./blueprint.md), [`codebase.md`](./codebase.md), [`AGENTS.md`](./AGENTS.md).
+Core HTTP: `@minostack/mino` — Fetch-native, runtime-agnostic (`Request`/`Response`), radix router, lazy `Context`, precompiled middleware, `validator("json", schema)`, `createClient`.
+
+Enterprise: `@minostack/kernel` — `@module`, `@injectable`, `@controller`, `Application.create(AppModule)`, DI Container (`singleton|request|transient`), lifecycle (`OnInit`/`OnStart`/`OnStop`/`OnDestroy`), `ExecutionContext`, `Guards`/`Pipes`/`Interceptors`.
+
+Adapters: `@minostack/runtime-node` / `-bun` / `-deno` — `serve(app, { port })`.
+
+Contracts: `@minostack/openapi` (`generateMinoDocument(app, info, schemas)`) and `@minostack/graphql` (`generateMinoSDL`) project canonical schemas to external API descriptions.
+
+Details: [`prompt.md`](./prompt.md), [`blueprint.md`](./blueprint.md), [`codebase.md`](./codebase.md), [`AGENTS.md`](./AGENTS.md).
 
 ## Repository structure
 
@@ -108,13 +112,25 @@ Tooling stack: `oxlint` (correctness, runs first) × `eslint` flat-configs (TS p
 
 ## Roadmap
 
-| Package              | Status                                                                                 |
-| -------------------- | -------------------------------------------------------------------------------------- |
-| `@minostack/schema`  | v0.1 core: validation, inference, metadata/facets, Standard Schema (`packages/schema`) |
-| `@minostack/openapi` | OAS 3.1 + 3.0 conversion with warned approximations (`packages/openapi`)               |
-| `@minostack/graphql` | GraphQL SDL conversion with warned approximations (`packages/graphql`)                 |
+| Package                   | Status                                                                                         |
+| ------------------------- | ---------------------------------------------------------------------------------------------- |
+| `@minostack/schema`       | v0.1 core: validation, inference, metadata/facets, Standard Schema (`packages/schema`)         |
+| `@minostack/openapi`      | OAS 3.1 + 3.0 conversion + `generateMinoDocument(app, …)` (`packages/openapi`)                 |
+| `@minostack/graphql`      | GraphQL SDL + `generateMinoSDL` (`packages/graphql`)                                           |
+| `@minostack/mino`         | Fetch-native HTTP, radix router, Context, middleware pipeline, SSE, client (`packages/mino`)   |
+| `@minostack/kernel`       | Application/Module/Container/DI, lifecycle, ExecutionContext, Guards/Pipes (`packages/kernel`) |
+| `@minostack/runtime-node` | Node adapter — Web-to-Node streams (`packages/runtime-node`)                                   |
+| `@minostack/runtime-bun`  | Bun adapter (`packages/runtime-bun`)                                                           |
+| `@minostack/runtime-deno` | Deno adapter (experimental, `packages/runtime-deno`)                                           |
+| `apps/benchmark`          | Benchmark harness per §31-32                                                                   |
 
-v0.1 scope: `string number boolean bigint date literal enum object array tuple record union intersection optional nullable lazy` + `parse/safeParse` + `infer/input/output` + metadata/facet hook. Deferred: async, coercion (beyond explicit `m.coerce`), compiled validators, JSON Schema / OpenAPI / GraphQL, serialization, codegen, CLI.
+- **Phase 0** Foundation: package architecture, contracts, type system, container design — ✅
+- **Phase 1** Mino core: Fetch core, router, context, pipeline — ✅
+- **Phase 2** Runtime adapters: Node/Bun/Deno — ✅
+- **Phase 3** Kernel: App/Module/Container/DI/lifecycle — ✅
+- **Phase 4** Contract ecosystem: DTO, `validator`, `generateMinoDocument`, `generateMinoSDL` — ✅
+- **Phase 5** RPC: `createClient`/`hc` typed proxy — ✅
+- **Phase 6** Hardening: alloc/GC profiling hooks, observability, docs — 🚧 (harness in `apps/benchmark`)
 
 ## Contributing
 

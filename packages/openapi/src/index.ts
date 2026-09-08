@@ -35,3 +35,5 @@ export type {
   WebhooksInput,
 } from "./types.js";
 export { document30, document31, oas30, oas31 } from "./oas.js";
+export { generateMinoDocument, generate, fromSchema, generateDocument } from "./mino.js";
+export type { MinoApp, MinoRouteOperation, MinoDocumentOptions } from "./mino.js";

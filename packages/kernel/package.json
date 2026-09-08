@@ -1,0 +1,57 @@
+{
+  "name": "@minostack/kernel",
+  "version": "0.0.0",
+  "description": "Deterministic application architecture and enterprise-grade runtime organization for Minostack.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "kernel",
+    "di",
+    "ioc",
+    "container",
+    "module",
+    "minostack"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest",
+    "lint": "oxlint && eslint .",
+    "clean": "rimraf dist",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "@minostack/mino": "workspace:*",
+    "@minostack/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@minostack/eslint-config": "workspace:*",
+    "@minostack/tsconfig": "workspace:*",
+    "@minostack/vitest-config": "workspace:*",
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "eslint": "catalog:",
+    "oxlint": "catalog:",
+    "rimraf": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

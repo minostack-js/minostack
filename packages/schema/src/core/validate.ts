@@ -90,20 +90,38 @@ function validateString(
     );
   }
   let value = input;
+  let cachedLen: number | undefined;
+  const getLen = (v: string): number => {
+    if (cachedLen !== undefined) return cachedLen;
+    cachedLen = stringLength(v);
+    return cachedLen;
+  };
+  const invalidateLen = () => {
+    cachedLen = undefined;
+  };
   const issues: ValidationIssue[] = [];
   for (const check of node.checks) {
     switch (check.kind) {
-      case "trim":
-        value = value.trim();
+      case "trim": {
+        const next = value.trim();
+        if (next !== value) invalidateLen();
+        value = next;
         break;
-      case "toLowerCase":
-        value = value.toLowerCase();
+      }
+      case "toLowerCase": {
+        const next = value.toLowerCase();
+        if (next !== value) invalidateLen();
+        value = next;
         break;
-      case "toUpperCase":
-        value = value.toUpperCase();
+      }
+      case "toUpperCase": {
+        const next = value.toUpperCase();
+        if (next !== value) invalidateLen();
+        value = next;
         break;
+      }
       case "min":
-        if (stringLength(value) < check.value) {
+        if (getLen(value) < check.value) {
           issues.push({
             code: "too_small",
             path,
@@ -114,7 +132,7 @@ function validateString(
         }
         break;
       case "max":
-        if (stringLength(value) > check.value) {
+        if (getLen(value) > check.value) {
           issues.push({
             code: "too_big",
             path,
@@ -124,10 +142,11 @@ function validateString(
           });
         }
         break;
-      case "length":
-        if (stringLength(value) !== check.value) {
+      case "length": {
+        const len = getLen(value);
+        if (len !== check.value) {
           issues.push({
-            code: check.value > stringLength(value) ? "too_small" : "too_big",
+            code: check.value > len ? "too_small" : "too_big",
             path,
             message: check.message ?? `Invalid length: expected string with length ${check.value}`,
             expected: check.value,
@@ -135,6 +154,7 @@ function validateString(
           });
         }
         break;
+      }
       case "email":
         if (!EMAIL_PATTERN.test(value)) {
           issues.push({
@@ -427,6 +447,15 @@ function validateBigInt(
 }
 
 function copyDefault(value: unknown): unknown {
+  if (value === null || typeof value !== "object") return value;
+  // Use structuredClone for deep copy when available (Node 22), otherwise shallow+deep for known cases
+  if (typeof globalThis.structuredClone === "function") {
+    try {
+      return globalThis.structuredClone(value);
+    } catch {
+      // fall through to shallow copy
+    }
+  }
   if (Array.isArray(value)) {
     return [...value];
   }
@@ -887,7 +916,18 @@ export function validateNode(
       if (!inner.ok) {
         return inner;
       }
-      return ok(node.transform(inner.value));
+      try {
+        return ok(node.transform(inner.value));
+      } catch (e) {
+        return fail([
+          {
+            code: "custom",
+            path,
+            message: (e as Error)?.message ?? "Transform failed",
+            received: inner.value,
+          },
+        ]);
+      }
     }
     case "refine": {
       const inner = validateNode(node.inner, input, path);
@@ -896,11 +936,20 @@ export function validateNode(
       }
       const issues: ValidationIssue[] = [];
       for (const refinement of node.refinements) {
-        if (!refinement.predicate(inner.value)) {
+        try {
+          if (!refinement.predicate(inner.value)) {
+            issues.push({
+              code: "custom",
+              path,
+              message: refinement.message ?? "Invalid value",
+              received: inner.value,
+            });
+          }
+        } catch (e) {
           issues.push({
             code: "custom",
             path,
-            message: refinement.message ?? "Invalid value",
+            message: (e as Error)?.message ?? refinement.message ?? "Invalid value",
             received: inner.value,
           });
         }

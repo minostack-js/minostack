@@ -3,6 +3,8 @@ dist/
 .turbo/
 coverage/
 
+prompt.md
+
 .env
 .env.*
 *.log

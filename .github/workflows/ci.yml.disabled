@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    name: check (node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [22, 24]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.5.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check
+        run: pnpm check
+
+      - name: Build
+        run: pnpm build
+
+      - name: Verify publish tarballs (no lock-in leakage)
+        run: |
+          echo "== @minostack/mino tarball =="
+          pnpm --filter @minostack/mino pack --dry-run 2>&1 | tee /tmp/mino-pack.txt
+          echo "--- mino must NOT contain kernel/schema/openapi ---"
+          if grep -q "kernel\|openapi\|graphql" /tmp/mino-pack.txt; then echo "ERROR: mino tarball leaks kernel/openapi/graphql"; cat /tmp/mino-pack.txt; exit 1; fi
+          if ! grep -q "dist/index.js" /tmp/mino-pack.txt; then echo "ERROR: mino tarball missing dist/index.js"; cat /tmp/mino-pack.txt; exit 1; fi
+          echo "== @minostack/kernel tarball =="
+          pnpm --filter @minostack/kernel pack --dry-run 2>&1 | tee /tmp/kernel-pack.txt
+          echo "--- kernel must contain mino but NOT bundle it ---"
+          grep -q "dist/index.js" /tmp/kernel-pack.txt || (echo "kernel missing dist"; exit 1)
+          echo "== @minostack/runtime-node tarball =="
+          pnpm --filter @minostack/runtime-node pack --dry-run 2>&1 | tee /tmp/runtime-pack.txt
+          if grep -q "kernel" /tmp/runtime-pack.txt; then echo "ERROR: runtime-node leaks kernel"; exit 1; fi
+          echo "All tarball checks passed — no lock-in leakage"

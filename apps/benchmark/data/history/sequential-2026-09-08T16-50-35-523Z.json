@@ -1,0 +1,28 @@
+{
+  "timestamp": "2026-09-08T16:50:35.523Z",
+  "mode": "quick",
+  "phases": [
+    {
+      "phase": "fetch",
+      "code": 0,
+      "durationMs": 162
+    },
+    {
+      "phase": "network",
+      "code": 0,
+      "durationMs": 0
+    }
+  ],
+  "system": {
+    "platform": "linux x64",
+    "node": "v24.3.0",
+    "runtime": "bun"
+  },
+  "artifacts": {
+    "fetchJson": "data/latest.json",
+    "fetchCsv": "data/latest.csv",
+    "fetchHtml": "data/report.html",
+    "networkJson": null
+  },
+  "note": "Sequential runner executed fetch + network phases in order. Fetch data is in data/latest.json + visual at data/report.html. Network data is logged to console (autocannon). For history, see data/history/"
+}
