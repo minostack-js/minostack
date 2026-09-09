@@ -2,7 +2,7 @@
   "name": "@minostack/schema",
   "version": "0.0.0",
   "description": "TypeScript-first, ESM-native, runtime-agnostic schema and validation library.",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "type": "module",
   "exports": {
     ".": {

@@ -8,13 +8,20 @@ export class HttpError extends Error {
   readonly expose: boolean;
   /** Optional machine-readable code */
   readonly code?: string;
+  /** Optional extra response headers (e.g. `Retry-After` on 429/503) */
+  readonly headers?: Record<string, string>;
 
-  constructor(status: number, message?: string, opts: { expose?: boolean; code?: string } = {}) {
+  constructor(
+    status: number,
+    message?: string,
+    opts: { expose?: boolean; code?: string; headers?: Record<string, string> } = {},
+  ) {
     super(message ?? HttpError.statusText(status));
     this.name = "HttpError";
     this.status = status;
     this.expose = opts.expose ?? status < 500;
     this.code = opts.code;
+    this.headers = opts.headers;
   }
 
   static statusText(status: number): string {
@@ -26,8 +33,11 @@ export class HttpError extends Error {
       405: "Method Not Allowed",
       408: "Request Timeout",
       409: "Conflict",
+      412: "Precondition Failed",
       413: "Payload Too Large",
+      414: "URI Too Long",
       415: "Unsupported Media Type",
+      416: "Range Not Satisfiable",
       422: "Unprocessable Entity",
       429: "Too Many Requests",
       500: "Internal Server Error",
@@ -46,10 +56,9 @@ export class HttpError extends Error {
       status: this.status,
       ...(this.code && this.expose ? { code: this.code } : {}),
     });
-    return new Response(body, {
-      status: this.status,
-      headers: { "content-type": "application/json; charset=utf-8" },
-    });
+    const headers: Record<string, string> = { "content-type": "application/json; charset=utf-8" };
+    if (this.headers) Object.assign(headers, this.headers);
+    return new Response(body, { status: this.status, headers });
   }
 }
 
@@ -85,6 +94,115 @@ export class PayloadTooLargeError extends HttpError {
   constructor(message = "Payload Too Large") {
     super(413, message, { expose: true, code: "payload_too_large" });
     this.name = "PayloadTooLargeError";
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Enterprise catalog (plan P0.1) — stable { error, status, code } shapes
+// for auth, conflict/state, resilience, and operations. All 4xx expose
+// their code; 5xx stay generic unless explicitly exposed.
+// ─────────────────────────────────────────────────────────────────
+
+export class MissingCredentialsError extends HttpError {
+  constructor(message = "Missing credentials") {
+    super(401, message, { expose: true, code: "missing_credentials" });
+    this.name = "MissingCredentialsError";
+  }
+}
+
+export class InvalidTokenError extends HttpError {
+  constructor(message = "Invalid token") {
+    super(401, message, { expose: true, code: "invalid_token" });
+    this.name = "InvalidTokenError";
+  }
+}
+
+export class ExpiredTokenError extends HttpError {
+  constructor(message = "Token expired") {
+    super(401, message, { expose: true, code: "token_expired" });
+    this.name = "ExpiredTokenError";
+  }
+}
+
+export class MissingRoleError extends HttpError {
+  constructor(message = "Missing required role") {
+    super(403, message, { expose: true, code: "missing_role" });
+    this.name = "MissingRoleError";
+  }
+}
+
+export class MissingPermissionError extends HttpError {
+  constructor(message = "Missing required permission") {
+    super(403, message, { expose: true, code: "missing_permission" });
+    this.name = "MissingPermissionError";
+  }
+}
+
+export class TenantForbiddenError extends HttpError {
+  constructor(message = "Tenant access denied") {
+    super(403, message, { expose: true, code: "tenant_forbidden" });
+    this.name = "TenantForbiddenError";
+  }
+}
+
+export class ConflictError extends HttpError {
+  constructor(message = "Conflict") {
+    super(409, message, { expose: true, code: "conflict" });
+    this.name = "ConflictError";
+  }
+}
+
+export class PreconditionFailedError extends HttpError {
+  constructor(message = "Precondition Failed") {
+    super(412, message, { expose: true, code: "precondition_failed" });
+    this.name = "PreconditionFailedError";
+  }
+}
+
+export class UriTooLongError extends HttpError {
+  constructor(message = "URI Too Long") {
+    super(414, message, { expose: true, code: "uri_too_long" });
+    this.name = "UriTooLongError";
+  }
+}
+
+export class TooManyRequestsError extends HttpError {
+  constructor(message = "Too Many Requests", retryAfterSec?: number) {
+    super(429, message, {
+      expose: true,
+      code: "rate_limited",
+      ...(retryAfterSec !== undefined ? { headers: { "retry-after": String(retryAfterSec) } } : {}),
+    });
+    this.name = "TooManyRequestsError";
+  }
+}
+
+export class BadGatewayError extends HttpError {
+  constructor(message = "Bad Gateway") {
+    super(502, message, { expose: false, code: "bad_gateway" });
+    this.name = "BadGatewayError";
+  }
+}
+
+export class ServiceUnavailableError extends HttpError {
+  constructor(message = "Service Unavailable", retryAfterSec?: number) {
+    super(503, message, {
+      expose: false,
+      code: "service_unavailable",
+      ...(retryAfterSec !== undefined ? { headers: { "retry-after": String(retryAfterSec) } } : {}),
+    });
+    this.name = "ServiceUnavailableError";
+  }
+}
+
+export class NotReadyError extends HttpError {
+  constructor(message = "Service Not Ready", retryAfterSec?: number) {
+    super(503, message, {
+      expose: true,
+      code: "not_ready",
+      ...(retryAfterSec !== undefined ? { headers: { "retry-after": String(retryAfterSec) } } : {}),
+    });
+    this.name = "NotReadyError";
   }
 }
 

@@ -4,6 +4,7 @@
  */
 
 import { BadRequestError, PayloadTooLargeError } from "./errors.js";
+import { contentDisposition, contentTypeForExt } from "./file.js";
 
 export type ContextState = Record<string, unknown>;
 
@@ -21,8 +22,23 @@ export interface RequestLimits {
   form?: number;
   /** Max arrayBuffer body bytes (default 102400). */
   arrayBuffer?: number;
+  /** Max octet-stream body bytes (default 102400). */
+  octet?: number;
   /** Max distinct query keys (default 100). */
   queryKeys?: number;
+  /** Max single query key chars (default 1024). */
+  queryKey?: number;
+  /**
+   * Max full request URL chars (default 16384 — mirrors Node's server-side
+   * request-line ceiling so Bun/Deno/edge get the same bound; exceed → 414).
+   */
+  urlLength?: number;
+  /**
+   * Max single `:param` segment chars after decoding (default 100 — Fastify
+   * `maxParamLength` parity; over-long params miss the route → 404, and
+   * wildcard remainders stay unbounded for file paths).
+   */
+  paramLength?: number;
   /** Max single query value chars (default 8192). */
   queryValue?: number;
   /** Max header count (default 100). */
@@ -31,6 +47,10 @@ export interface RequestLimits {
   headerValue?: number;
   /** Max form fields (default 100). */
   fieldCount?: number;
+  /** Max file entries in multipart form data (default 10). */
+  fileCount?: number;
+  /** Max bytes per uploaded file in multipart form data (default 5242880 = 5MB). */
+  fileSize?: number;
 }
 
 export type ResolvedLimits = Required<RequestLimits>;
@@ -40,11 +60,17 @@ export const DEFAULT_LIMITS: ResolvedLimits = {
   text: 102400,
   form: 102400,
   arrayBuffer: 102400,
+  octet: 102400,
   queryKeys: 100,
+  queryKey: 1024,
+  urlLength: 16384,
+  paramLength: 100,
   queryValue: 8192,
   headerKeys: 100,
   headerValue: 8192,
   fieldCount: 100,
+  fileCount: 10,
+  fileSize: 5242880,
 };
 
 export function resolveLimits(overrides?: RequestLimits): ResolvedLimits {
@@ -205,9 +231,14 @@ export class Context<E = Record<string, unknown>, P = Record<string, string>> {
   get query(): Record<string, string> {
     if (this.#query) return this.#query;
     const url = this.url;
-    const out: Record<string, string> = {};
+    // Null-prototype: `__proto__` stays an ordinary data key (no setter
+    // magic), so attacker keys can neither pollute nor crash this map.
+    const out: Record<string, string> = Object.create(null);
     let count = 0;
     url.searchParams.forEach((value, key) => {
+      if (key.length > this.#limits.queryKey) {
+        throw new BadRequestError("Query key too long");
+      }
       if (value.length > this.#limits.queryValue) {
         throw new BadRequestError("Query value too long");
       }
@@ -226,9 +257,12 @@ export class Context<E = Record<string, unknown>, P = Record<string, string>> {
   get queryAll(): Record<string, string[]> {
     if (this.#queryAll) return this.#queryAll;
     const url = this.url;
-    const out: Record<string, string[]> = {};
+    const out: Record<string, string[]> = Object.create(null);
     let count = 0;
     url.searchParams.forEach((value, key) => {
+      if (key.length > this.#limits.queryKey) {
+        throw new BadRequestError("Query key too long");
+      }
       if (value.length > this.#limits.queryValue) {
         throw new BadRequestError("Query value too long");
       }
@@ -354,6 +388,38 @@ export class Context<E = Record<string, unknown>, P = Record<string, string>> {
     const h = this.finalizeHeaders({ headers });
     if (!h.has("content-type")) h.set("content-type", "text/html; charset=utf-8");
     const res = new Response(data, { status: code, headers: h });
+    this.#response = res;
+    return res;
+  }
+
+  /**
+   * File-download response — sets `content-type` (explicit `type`, else
+   * inferred from `filename`, else `application/octet-stream`) and
+   * `content-disposition` when `filename` is given.
+   *
+   * ```ts
+   * app.get("/report", (c) => c.file(bytes, { filename: "report.pdf" }));
+   * app.get("/view", (c) => c.file(bytes, { filename: "a.pdf", disposition: "inline" }));
+   * ```
+   */
+  file(
+    data: BodyInit | Uint8Array | null,
+    opts: {
+      filename?: string;
+      disposition?: "attachment" | "inline";
+      type?: string;
+      headers?: HeadersInit;
+    } = {},
+  ): Response {
+    const code = this.#status ?? 200;
+    const h = this.finalizeHeaders({ headers: opts.headers });
+    const type =
+      opts.type ?? (opts.filename ? contentTypeForExt(opts.filename) : "application/octet-stream");
+    if (!h.has("content-type")) h.set("content-type", type);
+    if (opts.filename !== undefined) {
+      h.set("content-disposition", contentDisposition(opts.filename, opts.disposition));
+    }
+    const res = new Response(data as BodyInit | null, { status: code, headers: h });
     this.#response = res;
     return res;
   }

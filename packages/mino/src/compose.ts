@@ -79,10 +79,8 @@ export function compose(handlers: Handler[]): (c: Context) => Promise<Response> 
         return nextResult;
       }
 
-      // Handler did not call next() and did not return Response — if there are more handlers,
-      // we implicitly continue (for compatibility when handler forgets to call next but chain exists)
-      // However, per middleware semantics, if handler didn't call next, we should NOT continue unless it's the last?
-      // We'll not auto-continue; return whatever it returned or context res.
+      // Handler did not call next() and did not return Response.
+      // Strict contract: never auto-advance — see throw below.
       // Hardening: a defined non-Response return is a handler contract violation
       // (Handler type is Response | void). Fail closed via errorHandler → 500
       // instead of leaking a string/object where fetch callers expect Response.
@@ -91,13 +89,12 @@ export function compose(handlers: Handler[]): (c: Context) => Promise<Response> 
         throw new Error("Handler must return a Response or void");
       }
 
-      // No response yet and no next() — treat as pass-through to next handler if exists
-      // This handles the case where a middleware forgets to await next() but we still want to continue
-      // For now, dispatch next handler
+      // Strict contract: a non-terminal handler that neither returned a
+      // Response nor called next() is a bug — fail closed (500 via
+      // errorHandler) instead of silently auto-advancing and masking it.
+      // Terminal handlers fall through to the 404 fallback below.
       if (i + 1 < handlers.length) {
-        const downstream = (await dispatch(i + 1)) as unknown;
-        if (isResponse(downstream)) return downstream;
-        if (isResponse(c.res)) return c.res;
+        throw new Error("Handler must return a Response or call next()");
       }
 
       return undefined;

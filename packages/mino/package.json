@@ -2,7 +2,7 @@
   "name": "@minostack/mino",
   "version": "0.0.0",
   "description": "Lightweight, Fetch-native, runtime-agnostic HTTP framework for Minostack.",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "type": "module",
   "exports": {
     ".": {
@@ -28,6 +28,142 @@
     "./request-id": {
       "types": "./dist/request-id.d.ts",
       "import": "./dist/request-id.js"
+    },
+    "./cookie": {
+      "types": "./dist/cookie.d.ts",
+      "import": "./dist/cookie.js"
+    },
+    "./jwt": {
+      "types": "./dist/jwt.d.ts",
+      "import": "./dist/jwt.js"
+    },
+    "./paseto": {
+      "types": "./dist/paseto.d.ts",
+      "import": "./dist/paseto.js"
+    },
+    "./csrf": {
+      "types": "./dist/csrf.d.ts",
+      "import": "./dist/csrf.js"
+    },
+    "./session": {
+      "types": "./dist/session.d.ts",
+      "import": "./dist/session.js"
+    },
+    "./compress": {
+      "types": "./dist/compress.d.ts",
+      "import": "./dist/compress.js"
+    },
+    "./etag": {
+      "types": "./dist/etag.d.ts",
+      "import": "./dist/etag.js"
+    },
+    "./static": {
+      "types": "./dist/static.d.ts",
+      "import": "./dist/static.js"
+    },
+    "./basic-auth": {
+      "types": "./dist/basic-auth.d.ts",
+      "import": "./dist/basic-auth.js"
+    },
+    "./bearer-auth": {
+      "types": "./dist/bearer-auth.d.ts",
+      "import": "./dist/bearer-auth.js"
+    },
+    "./method-override": {
+      "types": "./dist/method-override.d.ts",
+      "import": "./dist/method-override.js"
+    },
+    "./trailing-slash": {
+      "types": "./dist/trailing-slash.d.ts",
+      "import": "./dist/trailing-slash.js"
+    },
+    "./trim-path": {
+      "types": "./dist/trim-path.d.ts",
+      "import": "./dist/trim-path.js"
+    },
+    "./vhost": {
+      "types": "./dist/vhost.d.ts",
+      "import": "./dist/vhost.js"
+    },
+    "./response-time": {
+      "types": "./dist/response-time.d.ts",
+      "import": "./dist/response-time.js"
+    },
+    "./powered-by": {
+      "types": "./dist/powered-by.d.ts",
+      "import": "./dist/powered-by.js"
+    },
+    "./ip-restriction": {
+      "types": "./dist/ip-restriction.d.ts",
+      "import": "./dist/ip-restriction.js"
+    },
+    "./formbody": {
+      "types": "./dist/formbody.d.ts",
+      "import": "./dist/formbody.js"
+    },
+    "./cache": {
+      "types": "./dist/cache.d.ts",
+      "import": "./dist/cache.js"
+    },
+    "./proxy": {
+      "types": "./dist/proxy.d.ts",
+      "import": "./dist/proxy.js"
+    },
+    "./under-pressure": {
+      "types": "./dist/under-pressure.d.ts",
+      "import": "./dist/under-pressure.js"
+    },
+    "./websocket": {
+      "types": "./dist/websocket.d.ts",
+      "import": "./dist/websocket.js"
+    },
+    "./file": {
+      "types": "./dist/file.d.ts",
+      "import": "./dist/file.js"
+    },
+    "./logger": {
+      "types": "./dist/logger.d.ts",
+      "import": "./dist/logger.js"
+    },
+    "./multipart": {
+      "types": "./dist/multipart.d.ts",
+      "import": "./dist/multipart.js"
+    },
+    "./envelope": {
+      "types": "./dist/envelope.d.ts",
+      "import": "./dist/envelope.js"
+    },
+    "./principal": {
+      "types": "./dist/principal.d.ts",
+      "import": "./dist/principal.js"
+    },
+    "./oidc": {
+      "types": "./dist/oidc.d.ts",
+      "import": "./dist/oidc.js"
+    },
+    "./retry": {
+      "types": "./dist/retry.d.ts",
+      "import": "./dist/retry.js"
+    },
+    "./circuit-breaker": {
+      "types": "./dist/circuit-breaker.d.ts",
+      "import": "./dist/circuit-breaker.js"
+    },
+    "./bulkhead": {
+      "types": "./dist/bulkhead.d.ts",
+      "import": "./dist/bulkhead.js"
+    },
+    "./idempotency": {
+      "types": "./dist/idempotency.d.ts",
+      "import": "./dist/idempotency.js"
+    },
+    "./health": {
+      "types": "./dist/health.d.ts",
+      "import": "./dist/health.js"
+    },
+    "./versioning": {
+      "types": "./dist/versioning.d.ts",
+      "import": "./dist/versioning.js"
     }
   },
   "types": "./dist/index.d.ts",
@@ -58,7 +194,7 @@
     "clean": "rimraf dist",
     "prepublishOnly": "pnpm run build"
   },
-  "_comment": "devDependencies: @minostack/schema is dev-only for tests — validator supports any Standard Schema (Zod, Valibot, ArkType) with zero runtime dep",
+  "_comment": "devDependencies: @minostack/schema is dev-only for tests \u2014 validator supports any Standard Schema (Zod, Valibot, ArkType) with zero runtime dep",
   "devDependencies": {
     "@minostack/eslint-config": "workspace:*",
     "@minostack/schema": "workspace:*",

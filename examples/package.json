@@ -2,7 +2,7 @@
   "name": "@minostack/examples",
   "version": "0.0.0",
   "description": "Compact, copy-pasteable examples for @minostack/* packages. Private, never published.",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "private": true,
   "type": "module",
   "sideEffects": false,
@@ -16,7 +16,13 @@
     "lint": "oxlint && eslint ."
   },
   "dependencies": {
+    "@minostack/cache": "workspace:*",
+    "@minostack/config": "workspace:*",
+    "@minostack/events": "workspace:*",
     "@minostack/graphql": "workspace:*",
+    "@minostack/jobs": "workspace:*",
+    "@minostack/kernel": "workspace:*",
+    "@minostack/mino": "workspace:*",
     "@minostack/openapi": "workspace:*",
     "@minostack/schema": "workspace:*"
   },

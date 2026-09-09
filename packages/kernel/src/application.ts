@@ -26,7 +26,7 @@ import {
   type PipeTransform,
 } from "./guards.js";
 import { callOnDestroy, callOnInit, callOnStart, callOnStop } from "./lifecycle.js";
-import { createTraceContext, getTracer } from "./observability.js";
+import { getTracer, resolveTraceContext } from "./observability.js";
 import { defaultExceptionFilter, type ExceptionFilter } from "./exceptions.js";
 
 export type ApplicationOptions = {
@@ -340,7 +340,9 @@ export class Application {
             return c.json({ error: "Not Found", status: 404 }, 404);
           }
           // Build ExecutionContext — fix module name bug: use ctor.name not ctor.constructor.name
-          const trace = this.opts.tracing ? createTraceContext() : undefined;
+          const trace = this.opts.tracing
+            ? resolveTraceContext(c.req.headers.get("traceparent"))
+            : undefined;
           const tracer = getTracer();
           const span = tracer.startSpan(`controller.${String(handlerName)}`, { kind: "server" });
           const ctx = new ExecutionContext({
@@ -549,8 +551,7 @@ export class Application {
     return {
       container: child,
       close: async () => {
-        // destroy request-scoped instances? For v0.1, just clear
-        // In future, call onDestroy for request-scoped
+        await child.destroyRequestScope();
       },
     };
   }

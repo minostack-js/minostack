@@ -1,0 +1,5 @@
+---
+"@minostack/mino": major
+---
+
+Initial 1.0.0-alpha.0 preview: Fetch-native router with static>param>wildcard priority, demand limits (100kb bodies → 413, 100 query/header keys and 8kb values → 400, 1kb query keys, 16kb URL → 414, 100-char params → 404), multipart fileCount/fileSize caps), per-feature sub-paths (helmet, cors, rate-limit, timeout, request-id, cookie, jwt, paseto, csrf, session, compress, etag, static, basic-auth, bearer-auth, method-override, trailing-slash, trim-path, vhost, response-time, powered-by, ip-restriction, formbody, cache, proxy, under-pressure, websocket, file, logger, multipart), switchable JWT/PASETO `token()` middleware, HTTP Range/206 static serving (single, multipart/byteranges, If-Range) with streaming runtime loaders, `c.file()` downloads, octet-stream validation, streaming multipart uploads, trustProxy IP resolution, strict middleware contract (must return Response or call next()), Standard Schema validator interop plus validatorAsync, and runtime-agnostic static loader iface. License standardized to Apache-2.0.

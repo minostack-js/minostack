@@ -32,6 +32,7 @@ export class Router {
   private root: Node = Router.createNode("", false, false);
   private routes: { method: string; path: string; handlers: Handler[] }[] = [];
   private strict: boolean;
+  private paramLength: number;
   /**
    * Static fast-map (§14 CPU bottom-line): O(1) bypass for routes without
    * `:` or `*`. Key = normalized pathname (trailing slash stripped when
@@ -39,8 +40,12 @@ export class Router {
    */
   private fastStatic = new Map<string, Map<string, { handlers: Handler[]; pattern: string }>>();
 
-  constructor(opts: { strict?: boolean } = {}) {
+  constructor(opts: { strict?: boolean; paramLength?: number } = {}) {
     this.strict = opts.strict ?? false;
+    // Fastify `maxParamLength` parity (default 100): over-long `:param`
+    // segments miss the route (404), like find-my-way. Wildcard remainders
+    // stay unbounded (file paths). Applies to decoded values.
+    this.paramLength = opts.paramLength ?? 100;
   }
 
   private normalizeLookup(pathname: string): string {
@@ -196,12 +201,16 @@ export class Router {
       } catch {
         return null;
       }
-      const prev = params[node.paramChild.paramName as string];
-      params[node.paramChild.paramName as string] = decoded;
-      const found = this.findNodeForPath(node.paramChild, segments, idx + 1, params);
-      if (found) return found;
-      if (prev === undefined) delete params[node.paramChild.paramName as string];
-      else params[node.paramChild.paramName as string] = prev;
+      // Fastify `maxParamLength`: over-long params miss this branch (405/404
+      // handling upstream sees no match), wildcard still gets its chance below.
+      if (decoded.length <= this.paramLength) {
+        const prev = params[node.paramChild.paramName as string];
+        params[node.paramChild.paramName as string] = decoded;
+        const found = this.findNodeForPath(node.paramChild, segments, idx + 1, params);
+        if (found) return found;
+        if (prev === undefined) delete params[node.paramChild.paramName as string];
+        else params[node.paramChild.paramName as string] = prev;
+      }
     }
     if (node.wildcardChild) {
       try {
@@ -260,7 +269,7 @@ export class Router {
       if (found) return found;
     }
 
-    // 2. Param child
+    // 2. Param child (skipped when over maxParamLength — misses the route)
     if (node.paramChild) {
       let decoded: string;
       try {
@@ -268,13 +277,15 @@ export class Router {
       } catch {
         throw new BadRequestError("Invalid URL encoding");
       }
-      const prev = params[node.paramChild.paramName as string];
-      params[node.paramChild.paramName as string] = decoded;
-      const found = this.matchNode(node.paramChild, segments, idx + 1, params);
-      if (found) return found;
-      // backtrack
-      if (prev === undefined) delete params[node.paramChild.paramName as string];
-      else params[node.paramChild.paramName as string] = prev;
+      if (decoded.length <= this.paramLength) {
+        const prev = params[node.paramChild.paramName as string];
+        params[node.paramChild.paramName as string] = decoded;
+        const found = this.matchNode(node.paramChild, segments, idx + 1, params);
+        if (found) return found;
+        // backtrack
+        if (prev === undefined) delete params[node.paramChild.paramName as string];
+        else params[node.paramChild.paramName as string] = prev;
+      }
     }
 
     // 3. Wildcard — consumes remainder

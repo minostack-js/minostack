@@ -12,7 +12,6 @@
  * ```
  */
 
-import type { Context } from "./context.js";
 import type { Handler } from "./types.js";
 
 export const REQUEST_ID_STATE_KEY = "requestId";
@@ -72,48 +71,8 @@ export function requestId(opts: RequestIdOptions = {}): Handler {
   };
 }
 
-export interface AccessLogEntry {
-  time: string;
-  method: string;
-  path: string;
-  route?: string;
-  status: number;
-  ms: number;
-  requestId?: string;
-}
-
-export interface LoggerOptions {
-  /** Sink (default `console.info` JSON line). Inject your Pino/Winston/Sentry writer. */
-  log?: (entry: AccessLogEntry) => void;
-  /** Skip logging for these paths (e.g. health checks). */
-  skip?: (c: Context) => boolean;
-}
-
-export function logger(opts: LoggerOptions = {}): Handler {
-  const log = opts.log ?? ((entry: AccessLogEntry) => console.info(JSON.stringify(entry)));
-  return async (c, next) => {
-    if (opts.skip && opts.skip(c as unknown as Context)) {
-      await next();
-      return;
-    }
-    const start = performance.now();
-    await next();
-    const ms = performance.now() - start;
-    // c.path triggers the lazy URL parse — acceptable: logging opts in.
-    let path = "-";
-    try {
-      path = c.path;
-    } catch {
-      path = "-";
-    }
-    log({
-      time: new Date().toISOString(),
-      method: c.method,
-      path,
-      route: c.routePath,
-      status: c.res?.status ?? 500,
-      ms: Math.round(ms * 1000) / 1000,
-      requestId: (c.get(REQUEST_ID_STATE_KEY) as string | undefined) ?? c.header("x-request-id"),
-    });
-  };
-}
+// `logger` (+ `AccessLogEntry` / `LoggerOptions`) lives in `./logger.js` —
+// re-exported here so `import { logger } from "@minostack/mino/request-id"`
+// keeps working unchanged.
+export { logger } from "./logger.js";
+export type { AccessLogEntry, LoggerOptions } from "./logger.js";

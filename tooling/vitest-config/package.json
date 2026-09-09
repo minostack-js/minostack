@@ -2,7 +2,7 @@
   "name": "@minostack/vitest-config",
   "version": "0.0.0",
   "description": "Shared Vitest base config for minostack-js workspaces.",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "private": true,
   "type": "module",
   "sideEffects": false,

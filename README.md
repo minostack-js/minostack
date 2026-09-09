@@ -119,6 +119,10 @@ Tooling stack: `oxlint` (correctness, runs first) × `eslint` flat-configs (TS p
 | `@minostack/graphql`      | GraphQL SDL + `generateMinoSDL` (`packages/graphql`)                                           |
 | `@minostack/mino`         | Fetch-native HTTP, radix router, Context, middleware pipeline, SSE, client (`packages/mino`)   |
 | `@minostack/kernel`       | Application/Module/Container/DI, lifecycle, ExecutionContext, Guards/Pipes (`packages/kernel`) |
+| `@minostack/config`       | Schema-backed config + redaction, dev-mode preview (`packages/config`)                         |
+| `@minostack/events`       | Domain events + outbox port + dev bus (`packages/events`)                                      |
+| `@minostack/cache`        | Replaceable cache port + memory backend (`packages/cache`)                                     |
+| `@minostack/jobs`         | Job definitions + scheduler port + dev worker (`packages/jobs`)                                |
 | `@minostack/runtime-node` | Node adapter — Web-to-Node streams (`packages/runtime-node`)                                   |
 | `@minostack/runtime-bun`  | Bun adapter (`packages/runtime-bun`)                                                           |
 | `@minostack/runtime-deno` | Deno adapter (experimental, `packages/runtime-deno`)                                           |

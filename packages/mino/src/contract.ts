@@ -11,7 +11,7 @@ export type AnySchema = {
   safeParse?: (value: unknown) => {
     success: boolean;
     data?: unknown;
-    error?: { issues: unknown[] };
+    error?: { issues: readonly unknown[] };
   };
 } & object;
 

@@ -37,3 +37,14 @@ export type {
 export { document30, document31, oas30, oas31 } from "./oas.js";
 export { generateMinoDocument, generate, fromSchema, generateDocument } from "./mino.js";
 export type { MinoApp, MinoRouteOperation, MinoDocumentOptions } from "./mino.js";
+export {
+  bearerAuth,
+  apiKeyAuth,
+  oidcAuth,
+  oauth2Auth,
+  diffRoutes,
+  assertCompatible,
+  type SecurityFragment,
+  type RouteRef,
+  type RouteDiff,
+} from "./compat.js";

@@ -1,0 +1,712 @@
+{
+  "timestamp": "2026-09-09T07:09:07.025Z",
+  "node": "v24.16.0",
+  "system": {
+    "cpu": "12th Gen Intel(R) Core(TM) i5-1235U",
+    "cores": 12,
+    "ram": "15.3 GB",
+    "platform": "linux x64 7.0.0-31-generic"
+  },
+  "config": {
+    "runs": 3,
+    "duration": 5,
+    "connections": 10,
+    "sustainedSecs": 60,
+    "scenarios": [
+      "static",
+      "param",
+      "multi-param",
+      "wildcard",
+      "deep-nested",
+      "middleware-1",
+      "middleware-5",
+      "middleware-10",
+      "small-json",
+      "text",
+      "large-json"
+    ]
+  },
+  "cells": [
+    {
+      "scenario": "static",
+      "framework": "mino",
+      "runs": 3,
+      "rpsRuns": [
+        24866,
+        26037,
+        24469
+      ],
+      "rpsMedian": 24866,
+      "avgMs": 0.06,
+      "p50": 0,
+      "p95": 1,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 186.5,
+      "rssMB": 614.7
+    },
+    {
+      "scenario": "static",
+      "framework": "hono",
+      "runs": 3,
+      "rpsRuns": [
+        28318,
+        28955,
+        28619
+      ],
+      "rpsMedian": 28619,
+      "avgMs": 0.02,
+      "p50": 0,
+      "p95": 0,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 25,
+      "rssMB": 618.2
+    },
+    {
+      "scenario": "static",
+      "framework": "express",
+      "runs": 3,
+      "rpsRuns": [
+        29618,
+        31202,
+        27787
+      ],
+      "rpsMedian": 29618,
+      "avgMs": 0.02,
+      "p50": 0,
+      "p95": 0,
+      "p99": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 27.1,
+      "rssMB": 618.5
+    },
+    {
+      "scenario": "param",
+      "framework": "mino",
+      "runs": 3,
+      "rpsRuns": [
+        17700,
+        18418,
+        18274
+      ],
+      "rpsMedian": 18274,
+      "avgMs": 0.04,
+      "p50": 0,
+      "p95": 0,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 32.2,
+      "rssMB": 619.6
+    },
+    {
+      "scenario": "param",
+      "framework": "hono",
+      "runs": 3,
+      "rpsRuns": [
+        20245,
+        21672,
+        20994
+      ],
+      "rpsMedian": 20994,
+      "avgMs": 0.04,
+      "p50": 0,
+      "p95": 1,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 18.2,
+      "rssMB": 620.6
+    },
+    {
+      "scenario": "param",
+      "framework": "express",
+      "runs": 3,
+      "rpsRuns": [
+        24453,
+        20969,
+        25739
+      ],
+      "rpsMedian": 24453,
+      "avgMs": 0.03,
+      "p50": 0,
+      "p95": 0,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 18,
+      "rssMB": 620.8
+    },
+    {
+      "scenario": "multi-param",
+      "framework": "mino",
+      "runs": 3,
+      "rpsRuns": [
+        18991,
+        19800,
+        19880
+      ],
+      "rpsMedian": 19800,
+      "avgMs": 0.04,
+      "p50": 0,
+      "p95": 0,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 26.1,
+      "rssMB": 621.5
+    },
+    {
+      "scenario": "multi-param",
+      "framework": "hono",
+      "runs": 3,
+      "rpsRuns": [
+        22306,
+        22114,
+        24661
+      ],
+      "rpsMedian": 22306,
+      "avgMs": 0.01,
+      "p50": 0,
+      "p95": 0,
+      "p99": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 18,
+      "rssMB": 621.8
+    },
+    {
+      "scenario": "multi-param",
+      "framework": "express",
+      "runs": 3,
+      "rpsRuns": [
+        26072,
+        26443,
+        25698
+      ],
+      "rpsMedian": 26072,
+      "avgMs": 0.02,
+      "p50": 0,
+      "p95": 0,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 17.8,
+      "rssMB": 620.7
+    },
+    {
+      "scenario": "wildcard",
+      "framework": "mino",
+      "runs": 3,
+      "rpsRuns": [
+        19358,
+        18987,
+        19333
+      ],
+      "rpsMedian": 19333,
+      "avgMs": 0.05,
+      "p50": 0,
+      "p95": 1,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 28.7,
+      "rssMB": 622
+    },
+    {
+      "scenario": "wildcard",
+      "framework": "hono",
+      "runs": 3,
+      "rpsRuns": [
+        26430,
+        24872,
+        27461
+      ],
+      "rpsMedian": 26430,
+      "avgMs": 0.01,
+      "p50": 0,
+      "p95": 0,
+      "p99": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 18.2,
+      "rssMB": 621.7
+    },
+    {
+      "scenario": "wildcard",
+      "framework": "express",
+      "runs": 3,
+      "rpsRuns": [
+        23845,
+        25762,
+        24885
+      ],
+      "rpsMedian": 24885,
+      "avgMs": 0.05,
+      "p50": 0,
+      "p95": 1,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 18.1,
+      "rssMB": 621.4
+    },
+    {
+      "scenario": "deep-nested",
+      "framework": "mino",
+      "runs": 3,
+      "rpsRuns": [
+        18670,
+        18760,
+        18696
+      ],
+      "rpsMedian": 18696,
+      "avgMs": 0.04,
+      "p50": 0,
+      "p95": 0,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 26.1,
+      "rssMB": 624.1
+    },
+    {
+      "scenario": "deep-nested",
+      "framework": "hono",
+      "runs": 3,
+      "rpsRuns": [
+        20024,
+        21912,
+        21861
+      ],
+      "rpsMedian": 21861,
+      "avgMs": 0.03,
+      "p50": 0,
+      "p95": 0,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 18.1,
+      "rssMB": 624.8
+    },
+    {
+      "scenario": "deep-nested",
+      "framework": "express",
+      "runs": 3,
+      "rpsRuns": [
+        24306,
+        27352,
+        25774
+      ],
+      "rpsMedian": 25774,
+      "avgMs": 0.02,
+      "p50": 0,
+      "p95": 0,
+      "p99": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 17.9,
+      "rssMB": 624.6
+    },
+    {
+      "scenario": "middleware-1",
+      "framework": "mino",
+      "runs": 3,
+      "rpsRuns": [
+        19941,
+        20491,
+        19931
+      ],
+      "rpsMedian": 19941,
+      "avgMs": 0.05,
+      "p50": 0,
+      "p95": 1,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 18.4,
+      "rssMB": 633
+    },
+    {
+      "scenario": "middleware-1",
+      "framework": "hono",
+      "runs": 3,
+      "rpsRuns": [
+        22331,
+        22267,
+        11101
+      ],
+      "rpsMedian": 22267,
+      "avgMs": 0.36,
+      "p50": 0,
+      "p95": 2,
+      "p99": 2,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 17.9,
+      "rssMB": 632
+    },
+    {
+      "scenario": "middleware-1",
+      "framework": "express",
+      "runs": 3,
+      "rpsRuns": [
+        16859,
+        23461,
+        20843
+      ],
+      "rpsMedian": 20843,
+      "avgMs": 0.06,
+      "p50": 0,
+      "p95": 1,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 17.8,
+      "rssMB": 631.2
+    },
+    {
+      "scenario": "middleware-5",
+      "framework": "mino",
+      "runs": 3,
+      "rpsRuns": [
+        13721,
+        15078,
+        16020
+      ],
+      "rpsMedian": 15078,
+      "avgMs": 0.09,
+      "p50": 0,
+      "p95": 1,
+      "p99": 2,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 25.1,
+      "rssMB": 637.6
+    },
+    {
+      "scenario": "middleware-5",
+      "framework": "hono",
+      "runs": 3,
+      "rpsRuns": [
+        18815,
+        20853,
+        21269
+      ],
+      "rpsMedian": 20853,
+      "avgMs": 0.01,
+      "p50": 0,
+      "p95": 0,
+      "p99": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 18.3,
+      "rssMB": 638.3
+    },
+    {
+      "scenario": "middleware-5",
+      "framework": "express",
+      "runs": 3,
+      "rpsRuns": [
+        23346,
+        23493,
+        23752
+      ],
+      "rpsMedian": 23493,
+      "avgMs": 0.02,
+      "p50": 0,
+      "p95": 0,
+      "p99": 0,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 18.1,
+      "rssMB": 637.6
+    },
+    {
+      "scenario": "middleware-10",
+      "framework": "mino",
+      "runs": 3,
+      "rpsRuns": [
+        16045,
+        16492,
+        16850
+      ],
+      "rpsMedian": 16492,
+      "avgMs": 0.07,
+      "p50": 0,
+      "p95": 1,
+      "p99": 2,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 22.9,
+      "rssMB": 637.8
+    },
+    {
+      "scenario": "middleware-10",
+      "framework": "hono",
+      "runs": 3,
+      "rpsRuns": [
+        20822,
+        21288,
+        20517
+      ],
+      "rpsMedian": 20822,
+      "avgMs": 0.03,
+      "p50": 0,
+      "p95": 0,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 18.3,
+      "rssMB": 638.2
+    },
+    {
+      "scenario": "middleware-10",
+      "framework": "express",
+      "runs": 3,
+      "rpsRuns": [
+        23176,
+        22808,
+        23061
+      ],
+      "rpsMedian": 23061,
+      "avgMs": 0.02,
+      "p50": 0,
+      "p95": 0,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 18.2,
+      "rssMB": 637.2
+    },
+    {
+      "scenario": "small-json",
+      "framework": "mino",
+      "runs": 3,
+      "rpsRuns": [
+        16371,
+        15540,
+        16156
+      ],
+      "rpsMedian": 16156,
+      "avgMs": 0.1,
+      "p50": 0,
+      "p95": 1,
+      "p99": 2,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 18.8,
+      "rssMB": 637
+    },
+    {
+      "scenario": "small-json",
+      "framework": "hono",
+      "runs": 3,
+      "rpsRuns": [
+        19737,
+        22245,
+        22850
+      ],
+      "rpsMedian": 22245,
+      "avgMs": 0.02,
+      "p50": 0,
+      "p95": 0,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 18.2,
+      "rssMB": 637.2
+    },
+    {
+      "scenario": "small-json",
+      "framework": "express",
+      "runs": 3,
+      "rpsRuns": [
+        26606,
+        25790,
+        20373
+      ],
+      "rpsMedian": 25790,
+      "avgMs": 0.03,
+      "p50": 0,
+      "p95": 0,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 17.9,
+      "rssMB": 637.1
+    },
+    {
+      "scenario": "text",
+      "framework": "mino",
+      "runs": 3,
+      "rpsRuns": [
+        14385,
+        14833,
+        15398
+      ],
+      "rpsMedian": 14833,
+      "avgMs": 0.14,
+      "p50": 0,
+      "p95": 1,
+      "p99": 2,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 30.1,
+      "rssMB": 637.8
+    },
+    {
+      "scenario": "text",
+      "framework": "hono",
+      "runs": 3,
+      "rpsRuns": [
+        18734,
+        20795,
+        18196
+      ],
+      "rpsMedian": 18734,
+      "avgMs": 0.1,
+      "p50": 0,
+      "p95": 1,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 18.7,
+      "rssMB": 637.9
+    },
+    {
+      "scenario": "text",
+      "framework": "express",
+      "runs": 3,
+      "rpsRuns": [
+        19282,
+        20085,
+        21342
+      ],
+      "rpsMedian": 20085,
+      "avgMs": 0.07,
+      "p50": 0,
+      "p95": 1,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 18.5,
+      "rssMB": 638.8
+    },
+    {
+      "scenario": "large-json",
+      "framework": "mino",
+      "runs": 3,
+      "rpsRuns": [
+        11916,
+        11737,
+        13182
+      ],
+      "rpsMedian": 11916,
+      "avgMs": 0.14,
+      "p50": 0,
+      "p95": 1,
+      "p99": 2,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 18.5,
+      "rssMB": 644.5
+    },
+    {
+      "scenario": "large-json",
+      "framework": "hono",
+      "runs": 3,
+      "rpsRuns": [
+        14631,
+        17522,
+        17273
+      ],
+      "rpsMedian": 17273,
+      "avgMs": 0.04,
+      "p50": 0,
+      "p95": 1,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 18.2,
+      "rssMB": 647.4
+    },
+    {
+      "scenario": "large-json",
+      "framework": "express",
+      "runs": 3,
+      "rpsRuns": [
+        16548,
+        16898,
+        17493
+      ],
+      "rpsMedian": 16898,
+      "avgMs": 0.07,
+      "p50": 0,
+      "p95": 1,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 18,
+      "rssMB": 652.7
+    }
+  ],
+  "sustained": [
+    {
+      "scenario": "sustained-static",
+      "framework": "mino",
+      "runs": 1,
+      "rpsRuns": [
+        18935
+      ],
+      "rpsMedian": 18935,
+      "avgMs": 0.06,
+      "p50": 0,
+      "p95": 1,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 24.1,
+      "rssMB": 651.9
+    },
+    {
+      "scenario": "sustained-static",
+      "framework": "hono",
+      "runs": 1,
+      "rpsRuns": [
+        22444
+      ],
+      "rpsMedian": 22444,
+      "avgMs": 0.03,
+      "p50": 0,
+      "p95": 0,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 18.5,
+      "rssMB": 653.8
+    },
+    {
+      "scenario": "sustained-static",
+      "framework": "express",
+      "runs": 1,
+      "rpsRuns": [
+        23676
+      ],
+      "rpsMedian": 23676,
+      "avgMs": 0.04,
+      "p50": 0,
+      "p95": 1,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 18.3,
+      "rssMB": 645.7
+    }
+  ],
+  "note": "Real sockets (autocannon). heapUsedMB/rssMB measured in the harness process after server close + gc() — includes harness overhead, comparable within a run only. Fetch micro-bench Express numbers (mocked req/res) are NOT comparable."
+}

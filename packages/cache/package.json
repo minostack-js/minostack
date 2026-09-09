@@ -1,0 +1,50 @@
+{
+  "name": "@minostack/cache",
+  "version": "0.0.0",
+  "description": "Replaceable cache port with dev-mode memory implementation for Minostack.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "cache",
+    "caching",
+    "minostack"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest",
+    "lint": "oxlint && eslint .",
+    "clean": "rimraf dist",
+    "prepublishOnly": "pnpm run build"
+  },
+  "devDependencies": {
+    "@minostack/eslint-config": "workspace:*",
+    "@minostack/tsconfig": "workspace:*",
+    "@minostack/vitest-config": "workspace:*",
+    "@types/node": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "eslint": "catalog:",
+    "oxlint": "catalog:",
+    "rimraf": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

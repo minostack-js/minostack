@@ -1,0 +1,74 @@
+{
+  "timestamp": "2026-09-09T07:07:52.843Z",
+  "node": "v24.16.0",
+  "system": {
+    "cpu": "12th Gen Intel(R) Core(TM) i5-1235U",
+    "cores": 12,
+    "ram": "15.3 GB",
+    "platform": "linux x64 7.0.0-31-generic"
+  },
+  "config": {
+    "runs": 1,
+    "duration": 2,
+    "connections": 10,
+    "sustainedSecs": 0,
+    "scenarios": [
+      "static"
+    ]
+  },
+  "cells": [
+    {
+      "scenario": "static",
+      "framework": "mino",
+      "runs": 1,
+      "rpsRuns": [
+        22896
+      ],
+      "rpsMedian": 22896,
+      "avgMs": 0.05,
+      "p50": 0,
+      "p95": 1,
+      "p99": 2,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 44.3,
+      "rssMB": 274.1
+    },
+    {
+      "scenario": "static",
+      "framework": "hono",
+      "runs": 1,
+      "rpsRuns": [
+        28448
+      ],
+      "rpsMedian": 28448,
+      "avgMs": 0.03,
+      "p50": 0,
+      "p95": 0,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 17.8,
+      "rssMB": 280.9
+    },
+    {
+      "scenario": "static",
+      "framework": "express",
+      "runs": 1,
+      "rpsRuns": [
+        31056
+      ],
+      "rpsMedian": 31056,
+      "avgMs": 0.02,
+      "p50": 0,
+      "p95": 0,
+      "p99": 1,
+      "errors": 0,
+      "timeouts": 0,
+      "heapUsedMB": 19.9,
+      "rssMB": 285.1
+    }
+  ],
+  "sustained": [],
+  "note": "Real sockets (autocannon). heapUsedMB/rssMB measured in the harness process after server close + gc() — includes harness overhead, comparable within a run only. Fetch micro-bench Express numbers (mocked req/res) are NOT comparable."
+}

@@ -4,6 +4,7 @@
  */
 
 import type { Mino } from "@minostack/mino";
+import type { StaticLoader } from "@minostack/mino/static";
 
 export type BunServeOptions = {
   port?: number;
@@ -67,4 +68,48 @@ export function serve(app: Pick<Mino, "fetch">, options: BunServeOptions = {}): 
  */
 export function toFetchHandler(app: Pick<Mino, "fetch">): (req: Request) => Promise<Response> {
   return (req: Request) => app.fetch(req);
+}
+
+// Minimal typing for `Bun.file` without requiring `@types/bun` at build time.
+type BunLoaderFile = {
+  exists(): Promise<boolean>;
+  stream(): ReadableStream<Uint8Array>;
+  slice(start: number, end: number): Pick<BunLoaderFile, "stream">;
+  lastModified: number;
+  size: number;
+};
+
+/**
+ * Filesystem loader for `@minostack/mino/static` on Bun (`Bun.file`).
+ * Streams bytes (`file.stream()`) instead of buffering.
+ * Paths are confined to `root`; escapes resolve to `undefined`.
+ *
+ * When `range` is given, the stream carries exactly bytes `[start..end]`
+ * (inclusive, via `file.slice(start, end + 1).stream()`) while `size`
+ * stays the FULL file size.
+ */
+export function createBunLoader(root: string): StaticLoader {
+  const base = root.replace(/\/+$/, "");
+  return {
+    async load(path: string, range?: { start: number; end: number }) {
+      if (path.includes("..") || path.includes("\\")) return undefined;
+      if (typeof Bun === "undefined") return undefined;
+      const file = (Bun as unknown as { file: (p: string) => BunLoaderFile }).file(
+        `${base}${path.startsWith("/") ? path : `/${path}`}`,
+      );
+      let exists = false;
+      try {
+        exists = await file.exists();
+      } catch {
+        return undefined;
+      }
+      if (!exists) return undefined;
+      const source = range === undefined ? file : file.slice(range.start, range.end + 1);
+      return {
+        body: source.stream() as unknown as BodyInit,
+        mtime: new Date(file.lastModified),
+        size: file.size,
+      };
+    },
+  };
 }

@@ -45,8 +45,11 @@ await app.start();
 - **Lifecycle** — `OnInit`/`OnStart`/`OnStop`/`OnDestroy`, ordered `app.start()`/`app.stop()`.
 - **ExecutionContext** — `request`, `route`, `module`, `controller`, `traceId`, for Guards/Interceptors.
 - **Guards/Pipes/Interceptors** — `@useGuards`, `@useInterceptors`, `@usePipes`.
+- **Authorization** — `roleGuard`/`permissionGuard`/`tenantGuard`/`policyGuard` over the shared Mino principal (`mino/principal`).
+- **Repository** — `Repository`/`MemoryRepository` ports with optimistic concurrency, `UnitOfWork`/`MemoryUnitOfWork`.
+- **Testing** — `testApp`, `createTestContext`, `testPrincipal`, `fixedClock`, `counterIds`, `fakeFetch`.
 - **DTO** — `createDto(name, schema)` — schema-backed, shared with OpenAPI/GraphQL.
-- **Observability** — `Tracer`/`Span`/`NoopTracer`, OpenTelemetry-compatible.
+- **Observability** — `Tracer`/`Span`/`NoopTracer`, OpenTelemetry-compatible, W3C `traceparent` continue-or-start (`parseTraceparent`, `formatTraceparent`, `resolveTraceContext`).
 
 ## Design
 

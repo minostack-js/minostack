@@ -1,8 +1,8 @@
 {
   "name": "@minostack/runtime-node",
   "version": "0.0.0",
-  "description": "Node.js adapter for @minostack/mino — Direct Web-to-Node Stream Adapter.",
-  "license": "MIT",
+  "description": "Node.js adapter for @minostack/mino \u2014 Direct Web-to-Node Stream Adapter.",
+  "license": "Apache-2.0",
   "type": "module",
   "exports": {
     ".": {

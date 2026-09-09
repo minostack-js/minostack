@@ -1,9 +1,10 @@
 /**
- * MinoStack Benchmark — vs Hono & Express v5
+ * MinoStack Benchmark — vs Hono, Express v5 & Fastify v5
  * Reproducible per prompt §31-32: Requests/sec, p50/p95/p99, RSS/heap, GC, CPU
  *
  * Runtimes: Node (>=22), Bun, Deno (auto-detected)
- * Frameworks: @minostack/mino (always), hono (if installed), express@5 (Node only)
+ * Frameworks: @minostack/mino (always), hono (if installed), express@5 (Node only),
+ *   fastify@5 (Node only: fetch bench via app.inject, network/matrix via real sockets)
  *
  * Run:
  *   pnpm --filter @minostack/benchmark bench              # fetch micro-benchmark (no network)
@@ -90,6 +91,7 @@ function getFrameworkVersions(): Record<string, string> {
   out["@minostack/mino"] = readVersion("@minostack/mino") ?? "workspace";
   out["hono"] = readVersion("hono") ?? "not installed";
   out["express"] = readVersion("express") ?? "not installed";
+  out["fastify"] = readVersion("fastify") ?? "not installed";
   out["autocannon"] = readVersion("autocannon") ?? "not installed";
   return out;
 }
@@ -679,6 +681,116 @@ async function createExpressApp(
   }
 }
 
+// Fastify — Node only, via app.inject() (light-my-request, no network, no mocks)
+type FastifyTestApp = {
+  get: (
+    p: string,
+    h: (req: { params: Record<string, string> }, reply: { send: (b: unknown) => void }) => void,
+  ) => void;
+  addHook: (name: string, h: () => Promise<void> | void) => void;
+  ready: () => Promise<void>;
+  inject: (opts: {
+    method: string;
+    url: string;
+    headers: Record<string, string>;
+    payload?: Buffer;
+  }) => Promise<{
+    statusCode: number;
+    headers: Record<string, string | string[] | undefined>;
+    body: string;
+  }>;
+};
+
+async function createFastifyApp(
+  scenario: string,
+): Promise<{ fetch: (req: Request) => Promise<Response>; url: string } | null> {
+  if (runtime !== "node") return null; // Fastify only meaningful on Node
+  let Fastify: unknown;
+  try {
+    const mod = await import("fastify");
+    Fastify = (mod as { default: unknown }).default ?? mod;
+  } catch {
+    return null;
+  }
+  const app = (Fastify as unknown as (opts: { logger: boolean }) => FastifyTestApp)({
+    logger: false,
+  });
+  const large = {
+    data: Array.from({ length: 20 }, (_, i) => ({
+      id: i,
+      name: `Name ${i}`,
+      value: "x".repeat(100),
+    })),
+  };
+  let path = "/";
+  switch (scenario) {
+    case "static":
+      app.get("/hello", (_req, reply) => reply.send("hi"));
+      path = "/hello";
+      break;
+    case "param":
+      app.get("/users/:id", (req, reply) => reply.send({ id: req.params.id }));
+      path = "/users/123";
+      break;
+    case "multi-param":
+      app.get("/users/:id/books/:bookId", (req, reply) => reply.send(req.params));
+      path = "/users/1/books/2";
+      break;
+    case "wildcard":
+      app.get("/files/*", (_req, reply) => reply.send("wildcard"));
+      path = "/files/a/b/c";
+      break;
+    case "deep-nested":
+      app.get("/a/b/c/d/e/:id", (req, reply) => reply.send({ id: req.params.id }));
+      path = "/a/b/c/d/e/123";
+      break;
+    case "middleware-1":
+    case "middleware-5":
+    case "middleware-10": {
+      const n = scenario === "middleware-1" ? 1 : scenario === "middleware-5" ? 5 : 10;
+      for (let i = 0; i < n; i++) app.addHook("onRequest", async () => {});
+      app.get("/", (_req, reply) => reply.send("ok"));
+      path = "/";
+      break;
+    }
+    case "small-json":
+      app.get("/json", (_req, reply) => reply.send({ ok: true, id: 1 }));
+      path = "/json";
+      break;
+    case "text":
+      app.get("/text", (_req, reply) => reply.send("hello world ".repeat(10)));
+      path = "/text";
+      break;
+    case "large-json":
+      app.get("/large", (_req, reply) => reply.send(large));
+      path = "/large";
+      break;
+    default:
+      app.get("/", (_req, reply) => reply.send("ok"));
+      path = "/";
+      break;
+  }
+  await app.ready();
+  const fetch = async (req: Request): Promise<Response> => {
+    const url = new URL(req.url);
+    const headers: Record<string, string> = {};
+    req.headers.forEach((v, k) => (headers[k] = v));
+    const payload = req.body ? Buffer.from(await req.arrayBuffer()) : undefined;
+    const res = await app.inject({
+      method: req.method,
+      url: url.pathname + url.search,
+      headers,
+      payload,
+    });
+    const outHeaders = new Headers();
+    for (const [k, v] of Object.entries(res.headers)) {
+      if (v !== undefined) outHeaders.set(k, Array.isArray(v) ? v.join(", ") : String(v));
+    }
+    return new Response(res.body, { status: res.statusCode, headers: outHeaders });
+  };
+  return { fetch, url: `http://localhost${path}` };
+}
+
 // ─────────────────────────────────────────────────────────────────
 // Matrix per §32
 // ─────────────────────────────────────────────────────────────────
@@ -735,6 +847,7 @@ function generateHtmlReport(
     mino: "#6366f1",
     hono: "#f59e0b",
     express: "#10b981",
+    fastify: "#38bdf8",
     "": "#6b7280",
   };
   // Prepare datasets for Chart.js: for each framework, array of RPS per scenario (moderate workload)
@@ -810,6 +923,7 @@ function generateHtmlReport(
               <div>mino <span class="font-semibold">${versions["@minostack/mino"] ?? versions["mino"] ?? "workspace"}</span></div>
               <div>hono <span class="font-semibold">${versions["hono"]}</span></div>
               <div>express <span class="font-semibold">${versions["express"]}</span></div>
+              <div>fastify <span class="font-semibold">${versions["fastify"]}</span></div>
               <div class="text-xs text-zinc-500">autocannon ${versions["autocannon"]}</div>
             </div>
           </div>
@@ -1042,6 +1156,18 @@ async function main() {
         if (exp) frameworks.push({ name: "express", fetch: exp.fetch, url: exp.url });
         else if (filterFramework === "express")
           console.log(`Skipping express for ${scenario}: not installed or not Node`);
+      }
+
+      // Fastify Node only (inject, no network)
+      if (
+        (runtime === "node" &&
+          (!filterFramework || ["fastify", "all", undefined].includes(filterFramework))) ||
+        filterFramework === "fastify"
+      ) {
+        const fast = await createFastifyApp(scenario);
+        if (fast) frameworks.push({ name: "fastify", fetch: fast.fetch, url: fast.url });
+        else if (filterFramework === "fastify")
+          console.log(`Skipping fastify for ${scenario}: not installed or not Node`);
       }
 
       for (const fw of frameworks) {

@@ -2,7 +2,7 @@
   "name": "@minostack/graphql",
   "version": "0.0.0",
   "description": "Convert @minostack/schema graphs to GraphQL SDL (types, inputs, enums, unions, scalars).",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "type": "module",
   "exports": {
     ".": {

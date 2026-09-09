@@ -11,6 +11,7 @@
 import { getTokenName, isClassToken, type Token } from "./token.js";
 import { normalizeProvider, type NormalizedProvider, type Provider } from "./provider.js";
 import type { Scope } from "./scope.js";
+import { isOnDestroy } from "./lifecycle.js";
 
 // Types for metadata storage
 export type ClassType<T = unknown> = new (...args: any[]) => T;
@@ -94,6 +95,20 @@ export class Container {
     this.singletons.clear();
     this.requestCache.clear();
     for (const child of this.children) child.clearCache();
+  }
+
+  /**
+   * Destroy request-scoped instances owned by this container: invokes
+   * `onDestroy` (reverse order) and drops the cache so resources never
+   * accumulate across requests. Singletons are untouched.
+   */
+  async destroyRequestScope(): Promise<void> {
+    const instances = [...this.requestCache.values()].reverse();
+    this.requestCache.clear();
+    for (const instance of instances) {
+      if (isOnDestroy(instance)) await instance.onDestroy();
+    }
+    if (this.parent) this.parent.children.delete(this);
   }
 
   // ─────────────────────────────────────────────────────────────────

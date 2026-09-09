@@ -2,7 +2,7 @@
   "name": "@minostack/runtime-deno",
   "version": "0.0.0",
   "description": "Deno adapter for @minostack/mino (experimental).",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "type": "module",
   "exports": {
     ".": {

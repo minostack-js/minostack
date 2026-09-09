@@ -316,7 +316,8 @@ describe("mino extra coverage", () => {
     const r2 = await fetchVia(app2, "/");
     expect(await r2.text()).toBe("base+mw");
 
-    // test handler that does not call next and returns void -> auto dispatch next
+    // strict contract: handler that does not call next and returns void
+    // with a downstream handler pending → 500 fail-closed
     const app3 = new Mino();
     app3.get(
       "/",
@@ -325,7 +326,7 @@ describe("mino extra coverage", () => {
       },
       (c) => c.text("second"),
     );
-    expect(await (await fetchVia(app3, "/")).text()).toBe("second");
+    expect((await fetchVia(app3, "/")).status).toBe(500);
   });
 
   it("Mino edge cases", async () => {

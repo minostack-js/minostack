@@ -4,7 +4,7 @@
  * Does NOT own: IoC, module system, DI, ORM — those belong to @minostack/kernel.
  */
 
-import { Context, type RequestLimits } from "./context.js";
+import { Context, DEFAULT_LIMITS, type RequestLimits } from "./context.js";
 import { Router } from "./router.js";
 import { compose } from "./compose.js";
 import { HttpError } from "./errors.js";
@@ -89,7 +89,10 @@ export class Mino<E extends Record<string, unknown> = Record<string, unknown>> {
 
   constructor(opts: MinoOptions = {}) {
     this.opts = opts;
-    this.router = new Router({ strict: opts.strict ?? false });
+    this.router = new Router({
+      strict: opts.strict ?? false,
+      paramLength: opts.limits?.paramLength ?? DEFAULT_LIMITS.paramLength,
+    });
   }
 
   private invalidatePipeline(): void {
@@ -136,9 +139,9 @@ export class Mino<E extends Record<string, unknown> = Record<string, unknown>> {
             c.setResponse(res);
             return;
           }
-          if (!nextCalled && i + 1 < handlers.length) {
-            await dispatch(i + 1);
-          }
+          // Strict contract (same as compose): do NOT auto-advance when a
+          // handler forgets next(). Just return — the outer pipeline fails
+          // closed with 500 if this wrapper is non-terminal.
         };
         await dispatch(0);
       };
@@ -304,6 +307,16 @@ export class Mino<E extends Record<string, unknown> = Record<string, unknown>> {
     // string slice, no `new URL` unless Context lazily needs it (c.url/query).
     // c.text/c.json never pay URL cost. Malformed URLs fall back to 400.
     const upMethod = request.method.toUpperCase();
+    // Framework-level URL ceiling (Node caps the request line ~16KB
+    // server-side; Bun/Deno/edge runtimes differ — enforce our own bound
+    // first so no runtime parses an unbounded URL). 414, like the path caps.
+    const urlCap = this.opts.limits?.urlLength ?? DEFAULT_LIMITS.urlLength;
+    if (request.url.length > urlCap) {
+      return new Response(JSON.stringify({ error: "URI Too Long", status: 414 }), {
+        status: 414,
+        headers: { "content-type": "application/json; charset=utf-8" },
+      });
+    }
     let pathname: string;
     try {
       const u = request.url;

@@ -194,3 +194,81 @@ describe("limits: error hygiene (A3/A4)", () => {
     expect(j.issues[0]?.received.length).toBeLessThanOrEqual(500);
   });
 });
+
+describe("limits: query keys are prototype-safe and key-bounded", () => {
+  function queryApp() {
+    const app = new Mino();
+    app.get("/q", (c) => c.json({ q: c.query }));
+    app.get("/qa", (c) => c.json({ q: c.queryAll }));
+    return app;
+  }
+
+  it("prototype-named keys are data, never a 500 (queryAll)", async () => {
+    const app = queryApp();
+    for (const k of ["__proto__", "constructor", "toString", "valueOf", "hasOwnProperty"]) {
+      const res = await fetchVia(app, `/qa?${k}=x&${k}=y`);
+      expect(res.status).toBe(200);
+      expect(await res.json()).toMatchObject({ q: { [k]: ["x", "y"] } });
+    }
+  });
+
+  it("prototype-named keys are data in query (first wins)", async () => {
+    const app = queryApp();
+    const res = await fetchVia(app, "/q?__proto__=x&constructor=foo");
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ q: { __proto__: "x", constructor: "foo" } });
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+  });
+
+  it("oversize query keys → 400 at the boundary", async () => {
+    const app = queryApp();
+    expect(DEFAULT_LIMITS.queryKey).toBe(1024);
+    const ok = await fetchVia(app, `/q?${"k".repeat(1024)}=1`);
+    expect(ok.status).toBe(200);
+    const bad = await fetchVia(app, `/q?${"k".repeat(1025)}=1`);
+    expect(bad.status).toBe(400);
+    const badAll = await fetchVia(app, `/qa?${"k".repeat(1025)}=1`);
+    expect(badAll.status).toBe(400);
+  });
+});
+
+describe("limits: framework parity (fastify/express/hono)", () => {
+  it("total URL length capped at 16384 → 414 (Node request-line parity)", async () => {
+    expect(DEFAULT_LIMITS.urlLength).toBe(16384);
+    const app = new Mino();
+    app.get("/x", (c) => c.text("ok"));
+    const base = "http://localhost/x?";
+    const make = (total: number): Request => new Request(base + "a".repeat(total - base.length));
+    expect((await app.fetch(make(16384))).status).toBe(200);
+    const over = await app.fetch(make(16385));
+    expect(over.status).toBe(414);
+    expect(await over.json()).toMatchObject({ status: 414 });
+  });
+
+  it("route params capped at 100 chars → miss (Fastify maxParamLength parity)", async () => {
+    expect(DEFAULT_LIMITS.paramLength).toBe(100);
+    const app = new Mino();
+    app.get("/users/:id", (c) => c.text(c.param("id")));
+    app.get("/files/*", (c) => c.text("wild"));
+    expect((await app.fetch(new Request(`http://localhost/users/${"a".repeat(100)}`))).status).toBe(
+      200,
+    );
+    expect((await app.fetch(new Request(`http://localhost/users/${"a".repeat(101)}`))).status).toBe(
+      404,
+    );
+    // Wildcards stay unbounded for file paths
+    expect((await app.fetch(new Request(`http://localhost/files/${"a".repeat(500)}`))).status).toBe(
+      200,
+    );
+  });
+
+  it("both caps are overridable", async () => {
+    const app = new Mino({ limits: { urlLength: 100, paramLength: 5 } });
+    app.get("/users/:id", (c) => c.text("ok"));
+    expect((await app.fetch(new Request("http://localhost/users/abcde"))).status).toBe(200);
+    expect((await app.fetch(new Request("http://localhost/users/abcdef"))).status).toBe(404);
+    expect(
+      (await app.fetch(new Request(`http://localhost/users/abcde?${"x".repeat(200)}`))).status,
+    ).toBe(414);
+  });
+});

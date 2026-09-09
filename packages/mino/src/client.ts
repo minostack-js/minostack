@@ -154,3 +154,106 @@ export const hc = createClient;
 export type InferClient<App> = App extends { getRoutes: () => readonly unknown[] }
   ? MinoClient
   : MinoClient;
+
+// ─────────────────────────────────────────────────────────────────
+// Contract client (plan P4.2) — server contracts drive the client, so
+// operation ids, paths, and schemas are never duplicated.
+// ─────────────────────────────────────────────────────────────────
+
+import type { RouteContract } from "./contract.js";
+import { ValidationError } from "./errors.js";
+
+export interface ContractCallOptions {
+  params?: Record<string, string>;
+  query?: Record<string, string | string[]>;
+  header?: Record<string, string>;
+  json?: unknown;
+  form?: Record<string, string>;
+  fetch?: RequestInit;
+}
+
+export interface ContractClientOptions extends ClientOptions {
+  /** Validate `json` against `contract.input` before sending (default false). */
+  validateInput?: boolean;
+}
+
+export type ContractClient = Record<string, (args?: ContractCallOptions) => Promise<Response>>;
+
+function validateContractInput(contract: RouteContract, json: unknown): void {
+  const schema = contract.input;
+  if (schema === undefined || json === undefined) return;
+  const std = schema["~standard"];
+  if (std) {
+    const res = std.validate(json) as { value: unknown } | { issues: readonly unknown[] };
+    if ("issues" in res)
+      throw new ValidationError("Contract input invalid", [...(res.issues ?? [])]);
+    return;
+  }
+  if (typeof schema.safeParse === "function") {
+    const res = schema.safeParse(json) as {
+      success: boolean;
+      error?: { issues: readonly unknown[] };
+    };
+    if (!res.success) {
+      throw new ValidationError("Contract input invalid", [...(res.error?.issues ?? [])]);
+    }
+  }
+}
+
+/**
+ * Build a client from route contracts. Operations are keyed by
+ * `contract.operation.operationId` (required — throws otherwise).
+ *
+ * ```ts
+ * const CreateUser = defineRoute({
+ *   method: "POST", path: "/v1/users", input: CreateUserSchema,
+ *   operation: { operationId: "createUser" },
+ * });
+ * const client = contractClient("https://api.example.com", [CreateUser]);
+ * await client.createUser({ json: { name: "Ada" } });
+ * ```
+ */
+export function contractClient(
+  baseUrl: string,
+  contracts: readonly RouteContract[],
+  options: ContractClientOptions = {},
+): ContractClient {
+  const fetcher = options.fetch ?? fetch;
+  const out: ContractClient = {};
+  for (const contract of contracts) {
+    const id = contract.operation?.operationId;
+    if (!id) throw new Error("contractClient: every contract needs operation.operationId");
+    out[id] = async (args: ContractCallOptions = {}): Promise<Response> => {
+      if (options.validateInput) validateContractInput(contract, args.json);
+      const url = buildUrl(
+        baseUrl,
+        contract.path.split("/").filter((s) => s.length > 0),
+        {
+          param: args.params,
+          query: args.query,
+        },
+      );
+      const headers = new Headers(options.headers);
+      if (args.header) {
+        for (const [k, v] of Object.entries(args.header)) headers.set(k, v);
+      }
+      let body: BodyInit | undefined;
+      if (args.json !== undefined) {
+        headers.set("content-type", "application/json");
+        body = JSON.stringify(args.json);
+      } else if (args.form) {
+        body = new URLSearchParams(args.form).toString();
+        headers.set("content-type", "application/x-www-form-urlencoded");
+      }
+      const method = contract.method.toUpperCase();
+      const init: RequestInit = {
+        method,
+        headers,
+        body: method === "GET" || method === "HEAD" ? undefined : body,
+        ...args.fetch,
+      };
+      return fetcher(url, init);
+    };
+  }
+  return out;
+}

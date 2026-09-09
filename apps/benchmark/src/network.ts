@@ -1,5 +1,5 @@
 /**
- * Network Benchmark — autocannon vs Node http (Mino / Hono / Express)
+ * Network Benchmark — autocannon vs Node http (Mino / Hono / Express / Fastify)
  * Per §31: autocannon for network, with RSS/heap, p50/p95/p99
  *
  * Run:
@@ -53,6 +53,7 @@ function getVersions() {
     mino: readVersion("@minostack/mino") ?? "workspace",
     hono: readVersion("hono") ?? "not installed",
     express: readVersion("express") ?? "not installed",
+    fastify: readVersion("fastify") ?? "not installed",
     autocannon: readVersion("autocannon") ?? "not installed",
   };
 }
@@ -252,6 +253,30 @@ async function main() {
             e ? rej(e) : res(),
           ),
         ),
+    };
+  });
+
+  // Fastify (real socket via app.listen)
+  await benchWithServer("fastify", async () => {
+    const fastifyMod = await import("fastify").then(
+      (m) => (m as { default: unknown }).default ?? m,
+    );
+    const app = (
+      fastifyMod as unknown as (opts: { logger: boolean }) => {
+        get: (p: string, h: (req: unknown, reply: unknown) => void) => void;
+        listen: (opts: { port: number; host: string }) => Promise<string>;
+        server: { address: () => { port: number } };
+        close: () => Promise<void>;
+      }
+    )({ logger: false });
+    app.get("/hello", (_req: unknown, reply: unknown) =>
+      (reply as { send: (b: string) => void }).send("hi"),
+    );
+    await app.listen({ port: 0, host: "127.0.0.1" });
+    const addr = app.server.address();
+    return {
+      url: `http://127.0.0.1:${addr.port}/hello`,
+      close: () => app.close().then(() => {}),
     };
   });
 

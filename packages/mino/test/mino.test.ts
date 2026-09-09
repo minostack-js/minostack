@@ -389,19 +389,9 @@ describe("Mino core", () => {
     expect(res.status).toBe(404);
   });
 
-  it("compose next without next call auto-continues", async () => {
-    const app = new Mino();
-    let secondRan = false;
-    app.get(
-      "/",
-      (c) => c.text("first"),
-      (_c, _next) => {
-        secondRan = true;
-        return undefined as unknown as Response;
-      },
-    );
-    // Actually second handler as middleware that doesn't call next but returns void -> compose will auto-dispatch next
-    // Our test: two handlers, first doesn't call next nor return Response, second should run via auto-dispatch
+  it("compose without next() or Response fails closed (strict contract)", async () => {
+    // Forgetting next() in a non-terminal handler is a bug — must 500,
+    // not silently auto-advance.
     const app2 = new Mino();
     app2.get(
       "/",
@@ -411,8 +401,20 @@ describe("Mino core", () => {
       (c) => c.text("second"),
     );
     const res = await fetchVia(app2, "/");
+    expect(res.status).toBe(500);
+  });
+
+  it("compose explicit next() chain still works", async () => {
+    const app = new Mino();
+    app.get(
+      "/explicit",
+      async (c, next) => {
+        await next();
+      },
+      (c) => c.text("second"),
+    );
+    const res = await fetchVia(app, "/explicit");
     expect(await res.text()).toBe("second");
-    void secondRan;
   });
 
   it("client createClient", async () => {

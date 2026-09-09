@@ -75,9 +75,10 @@ describe("coverage additional", () => {
     expect((m1?.params as Record<string, string>).name).toBeUndefined();
   });
 
-  it("compose handles next multiple times and auto-continue", async () => {
+  it("compose handles next multiple times and strict no-next", async () => {
     const app = new Mino();
-    // Test auto-continue: first handler doesn't call next nor return Response, second should run via auto-dispatch
+    // Strict contract: first handler forgets next() and returns nothing
+    // with a downstream handler pending → 500 fail-closed.
     app.get(
       "/auto",
       (c, _next) => {
@@ -86,7 +87,7 @@ describe("coverage additional", () => {
       (c) => c.text("second"),
     );
     const res = await fetchVia(app, "/auto");
-    expect(await res.text()).toBe("second");
+    expect(res.status).toBe(500);
 
     // Test double next throws 500
     const app2 = new Mino();

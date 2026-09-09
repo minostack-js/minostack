@@ -2,7 +2,7 @@
   "name": "@minostack/kernel",
   "version": "0.0.0",
   "description": "Deterministic application architecture and enterprise-grade runtime organization for Minostack.",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "type": "module",
   "exports": {
     ".": {

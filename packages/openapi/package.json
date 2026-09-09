@@ -2,7 +2,7 @@
   "name": "@minostack/openapi",
   "version": "0.0.0",
   "description": "Convert @minostack/schema graphs to OpenAPI 3.1 and 3.0 Schema Objects and documents.",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "type": "module",
   "exports": {
     ".": {
@@ -39,7 +39,7 @@
   "dependencies": {
     "@minostack/schema": "workspace:*"
   },
-  "_comment": "devDependencies: @minostack/mino is dev-only for mino.test.ts — openapi runtime dep is only @minostack/schema, no mino lock-in",
+  "_comment": "devDependencies: @minostack/mino is dev-only for mino.test.ts \u2014 openapi runtime dep is only @minostack/schema, no mino lock-in",
   "devDependencies": {
     "@minostack/eslint-config": "workspace:*",
     "@minostack/mino": "workspace:*",

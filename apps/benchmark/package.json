@@ -9,8 +9,11 @@
     "bench:mino": "tsx src/index.ts -- --framework=mino",
     "bench:hono": "tsx src/index.ts -- --framework=hono",
     "bench:express": "tsx src/index.ts -- --framework=express",
+    "bench:fastify": "tsx src/index.ts -- --framework=fastify",
     "bench:network": "tsx src/network.ts",
     "bench:network:quick": "tsx src/network.ts -- --connections=10 --duration=5",
+    "bench:matrix": "NODE_OPTIONS=--expose-gc tsx src/matrix.ts",
+    "bench:matrix:quick": "NODE_OPTIONS=--expose-gc tsx src/matrix.ts -- --quick",
     "bench:sequential": "tsx src/sequential.ts",
     "bench:sequential:quick": "tsx src/sequential.ts -- --quick",
     "bench:report": "tsx src/sequential.ts",
@@ -40,6 +43,7 @@
     "@types/express": "^5.0.6",
     "autocannon": "^8.0.0",
     "express": "^5.2.1",
+    "fastify": "^5.12.3",
     "hono": "^4.13.7"
   },
   "devDependencies": {

@@ -2,7 +2,7 @@
   "name": "@minostack/eslint-config",
   "version": "0.0.0",
   "description": "Shared ESLint flat-config base for minostack-js workspaces.",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "private": true,
   "type": "module",
   "sideEffects": false,

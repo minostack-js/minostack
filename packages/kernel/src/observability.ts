@@ -85,3 +85,33 @@ export function createTraceContext(): TraceContext {
   const rand = () => Math.random().toString(36).slice(2, 10);
   return { traceId: rand() + rand(), spanId: rand(), traceFlags: 1 };
 }
+
+// ─────────────────────────────────────────────────────────────────
+// W3C traceparent propagation (plan P3.5) — `00-<trace-id>-<span-id>-<flags>`
+// ─────────────────────────────────────────────────────────────────
+
+const TRACEPARENT = /^00-([0-9a-f]{32})-([0-9a-f]{16})-([0-9a-f]{2})$/;
+
+/** Parse an incoming `traceparent` header. Returns `undefined` when absent/malformed. */
+export function parseTraceparent(header: string | null | undefined): TraceContext | undefined {
+  if (!header) return undefined;
+  const match = TRACEPARENT.exec(header.trim().toLowerCase());
+  if (!match) return undefined;
+  const [, traceId, spanId, flags] = match as unknown as [string, string, string, string];
+  if (traceId === "0".repeat(32) || spanId === "0".repeat(16)) return undefined;
+  return { traceId, spanId, traceFlags: parseInt(flags, 16) & 1 };
+}
+
+/** Serialize a context to a `traceparent` header value. */
+export function formatTraceparent(ctx: TraceContext): string {
+  const flags = (ctx.traceFlags ?? 1).toString(16).padStart(2, "0");
+  return `00-${ctx.traceId}-${ctx.spanId}-${flags}`;
+}
+
+/**
+ * Resolve the trace context for a request: continue the incoming trace when
+ * the header is valid, otherwise start a fresh one.
+ */
+export function resolveTraceContext(header: string | null | undefined): TraceContext {
+  return parseTraceparent(header) ?? createTraceContext();
+}

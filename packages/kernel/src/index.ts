@@ -113,7 +113,33 @@ export {
   getTracer,
   setTracer,
   createTraceContext,
+  parseTraceparent,
+  formatTraceparent,
+  resolveTraceContext,
 } from "./observability.js";
+
+// Authorization — principal-backed policy guards
+export { roleGuard, permissionGuard, tenantGuard, policyGuard } from "./authorization.js";
+
+// Repository + unit-of-work ports
+export {
+  MemoryRepository,
+  MemoryUnitOfWork,
+  type Repository,
+  type UnitOfWork,
+  type Versioned,
+} from "./repository.js";
+
+// Testing helpers
+export {
+  testApp,
+  testPrincipal,
+  createTestContext,
+  fixedClock,
+  counterIds,
+  fakeFetch,
+  type FakeFetchCall,
+} from "./testing.js";
 
 // DTO
 export {
